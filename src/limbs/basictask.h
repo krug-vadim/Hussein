@@ -24,6 +24,9 @@ class BasicTask : public QObject
 		bool isDone() const;
 		void setDone(const bool done);
 
+		bool isCollapsed() const;
+		void setCollapsed(const bool collapsed);
+
 		void clear();
 
 		const TaskList &subtasks() const;
@@ -39,6 +42,7 @@ class BasicTask : public QObject
 
 		QString    _description;
 		bool       _done;
+		bool       _collapsed;
 
 		TaskList   _subtasks;
 };

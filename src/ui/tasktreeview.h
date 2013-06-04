@@ -12,6 +12,9 @@ class TaskTreeView : public QTreeView
 	public:
 		explicit TaskTreeView(QWidget *parent = 0);
 
+	signals:
+		void changed();
+
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void paintEvent(QPaintEvent *event);

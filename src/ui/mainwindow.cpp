@@ -23,7 +23,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::newFile()
 {
-	ui->tabWidget->addTab(new TaskTreeWidget(this), tr("New tasklist"));
+	QString taskList = tr("Tasklist %1").arg(ui->tabWidget->count() + 1);
+
+	ui->tabWidget->addTab(new TaskTreeWidget(this), taskList);
+
+	status(tr("Created %1.").arg(taskList));
 }
 
 void MainWindow::openFile()
@@ -42,7 +46,11 @@ void MainWindow::openFile()
 		TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
 
 		taskTreeWidget->setFileName(fileName);
-		taskTreeWidget->open();
+
+		if ( taskTreeWidget->open() )
+			status(tr("Opened %1.").arg(fileName));
+		else
+			status(tr("Failed to open %1.").arg(fileName));
 
 		ui->tabWidget->addTab(taskTreeWidget, fileInfo.baseName());
 	}
@@ -68,7 +76,10 @@ void MainWindow::saveFile()
 		taskTreeWidget->setFileName(fileName);
 	}
 
-	taskTreeWidget->save();
+	if ( taskTreeWidget->save() )
+		status(tr("Saved %1.").arg(taskTreeWidget->fileName()));
+	else
+		status(tr("Failed to save %1.").arg(taskTreeWidget->fileName()));
 }
 
 void MainWindow::saveAsFile()
@@ -79,16 +90,24 @@ void MainWindow::saveAsFile()
 		return;
 
 	QString fileName = QFileDialog::getSaveFileName(this,
-													tr("Save tasklist"),
-													QString(),
-													tr("Tasklist (*.json)"));
+	                                                tr("Save tasklist"),
+	                                                QString(),
+	                                                tr("Tasklist (*.json)"));
 
 	if ( fileName.isEmpty() )
 		return;
 
 	taskTreeWidget->setFileName(fileName);
 
-	taskTreeWidget->save();
+	if ( taskTreeWidget->save() )
+		status(tr("Saved %1.").arg(taskTreeWidget->fileName()));
+	else
+		status(tr("Failed to save %1.").arg(taskTreeWidget->fileName()));
+}
+
+void MainWindow::status(const QString &message)
+{
+	ui->statusbar->showMessage(message, DEFAULT_STATUS_TIME);
 }
 
 void MainWindow::setupActions()
@@ -104,7 +123,6 @@ void MainWindow::setupActions()
 
 	connect(ui->actionSaveAs, &QAction::triggered,
 	        this, &MainWindow::saveAsFile);
-
 
 	connect(ui->actionQuit, &QAction::triggered,
 	        this, &MainWindow::close);

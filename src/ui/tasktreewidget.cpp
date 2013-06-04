@@ -23,6 +23,8 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_taskModel->setTaskFactory(new TaskFactory(this));
 
 	ui->tasksView->setModel(_taskModel);
+
+	ui->tasksView->setFocus();
 }
 
 TaskTreeWidget::~TaskTreeWidget()
@@ -45,16 +47,20 @@ void TaskTreeWidget::setFileName(const QString &fileName)
 	_fileName = fileName;
 }
 
-void TaskTreeWidget::open()
+bool TaskTreeWidget::open()
 {
 	_rootTask->clear();
 
 	if ( !fileName().isEmpty() )
-		JsonSerialization::deserialize(fileName(), _rootTask);
+		return JsonSerialization::deserialize(fileName(), _rootTask);
+	else
+		return false;
 }
 
-void TaskTreeWidget::save()
+bool TaskTreeWidget::save()
 {
 	if ( !fileName().isEmpty() )
-		JsonSerialization::serialize(fileName(), _rootTask);
+		return JsonSerialization::serialize(fileName(), _rootTask);
+	else
+		return false;
 }

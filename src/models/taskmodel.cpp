@@ -23,9 +23,6 @@ QModelIndex TaskModel::index(int row, int column, const QModelIndex &parent) con
 	if ( !hasIndex(row, column, parent) )
 		return QModelIndex();
 
-	if ( root() && root()->subtasks().empty() )
-		return createIndex(row, column);
-
 	BasicTask *parentTask = getTask(parent);
 
 	if ( !parentTask )
@@ -40,9 +37,6 @@ QModelIndex TaskModel::index(int row, int column, const QModelIndex &parent) con
 QModelIndex TaskModel::parent(const QModelIndex &index) const
 {
 	if (!index.isValid())
-		return QModelIndex();
-
-	if ( root() && root()->subtasks().empty() )
 		return QModelIndex();
 
 	BasicTask *subTask;

@@ -44,8 +44,21 @@ void BasicTask::setDone(const bool done)
 	_done = done;
 }
 
+bool BasicTask::isCollapsed() const
+{
+	return _collapsed;
+}
+
+void BasicTask::setCollapsed(const bool collapsed)
+{
+	_collapsed = collapsed;
+}
+
 void BasicTask::clear()
 {
+	_done = false;
+	_collapsed = false;
+
 	qDeleteAll(_subtasks);
 	_subtasks.clear();
 }

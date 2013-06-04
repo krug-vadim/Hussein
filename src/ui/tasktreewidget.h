@@ -25,8 +25,8 @@ class TaskTreeWidget : public QWidget
 		void setFileName(const QString &fileName);
 
 	public slots:
-		void open();
-		void save();
+		bool open();
+		bool save();
 
 	private:
 		TaskModel *_taskModel;

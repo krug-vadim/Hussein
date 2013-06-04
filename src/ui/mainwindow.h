@@ -22,7 +22,12 @@ class MainWindow : public QMainWindow
 		void saveFile();
 		void saveAsFile();
 
+		//
+		void status(const QString &message);
+
 	private:
+		static const int DEFAULT_STATUS_TIME = 3000;
+
 		void setupActions();
 
 		Ui::MainWindow *ui;
