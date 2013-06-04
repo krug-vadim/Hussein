@@ -14,6 +14,7 @@ class TaskTreeView : public QTreeView
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event);
+		virtual void paintEvent(QPaintEvent *event);
 
 	private:
 		void addTask();

@@ -36,7 +36,7 @@
     </layout>
    </item>
    <item>
-    <widget class="TaskTreeView" name="treeView"/>
+    <widget class="TaskTreeView" name="tasksView"/>
    </item>
   </layout>
  </widget>
@@ -47,6 +47,11 @@
    <header>src/ui/tasktreeview.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tasksView</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>checkBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

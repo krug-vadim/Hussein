@@ -1,10 +1,20 @@
 #include "tasktreeview.h"
 
 #include <QtGui/QKeyEvent>
+#include <QtGui/QPainter>
+#include <QtGui/QPalette>
+#include <QtGui/QFont>
 
 TaskTreeView::TaskTreeView(QWidget *parent)
     : QTreeView(parent)
 {
+	setFocusPolicy(Qt::StrongFocus);
+	setTabKeyNavigation(true);
+	setEditTriggers(QAbstractItemView::AnyKeyPressed
+	               |QAbstractItemView::DoubleClicked
+	               |QAbstractItemView::EditKeyPressed);
+	setAllColumnsShowFocus(true);
+	setHeaderHidden(false);
 }
 
 void TaskTreeView::keyPressEvent(QKeyEvent *event)
@@ -63,6 +73,24 @@ void TaskTreeView::keyPressEvent(QKeyEvent *event)
 	event->accept();
 }
 
+void TaskTreeView::paintEvent(QPaintEvent *event)
+{
+	QPainter painter(viewport());
+	QPalette palette;
+	QFont font;
+
+	if ( model()->rowCount() == 0 )
+	{
+		font.setItalic(true);
+		font.setPointSize(26);
+		painter.setPen(palette.color(QPalette::Disabled, QPalette::Text));
+		painter.setFont(font);
+		painter.drawText(rect(), Qt::AlignCenter, "click here & press ENTER...");
+	}
+	else
+		QTreeView::paintEvent(event);
+}
+
 void TaskTreeView::addTask()
 {
 	if ( !model() )
@@ -94,7 +122,8 @@ void TaskTreeView::deleteTask()
 {
 	QModelIndex index = selectionModel()->currentIndex();
 
-	model()->removeRow(index.row(), index.parent());
+	if ( index.isValid() )
+		model()->removeRow(index.row(), index.parent());
 }
 
 void TaskTreeView::taskMoveUp()

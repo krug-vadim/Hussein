@@ -1,21 +1,27 @@
 #ifndef TASKTREEWIDGET_H
 #define TASKTREEWIDGET_H
 
-#include <QWidget>
+#include <QtWidgets/QWidget>
 
-namespace Ui {
+class BasicTask;
+class TaskModel;
+
+namespace Ui
+{
 	class TaskTreeWidget;
 }
 
 class TaskTreeWidget : public QWidget
 {
-		Q_OBJECT
-		
+	Q_OBJECT
+
 	public:
-		explicit TaskTreeWidget(QWidget *parent = 0);
+		explicit TaskTreeWidget(BasicTask *root, QWidget *parent = 0);
 		~TaskTreeWidget();
-		
+
 	private:
+		TaskModel *_taskModel;
+
 		Ui::TaskTreeWidget *ui;
 };
 

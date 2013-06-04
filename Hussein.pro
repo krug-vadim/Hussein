@@ -5,15 +5,20 @@ TEMPLATE = app
 
 SOURCES += \
     src/main.cpp \
+    src/limbs/basictask.cpp \
+    src/models/taskmodel.cpp \
     src/ui/mainwindow.cpp \
     src/ui/tasktreewidget.cpp \
-    src/ui/tasktreeview.cpp
-
+    src/ui/tasktreeview.cpp \
+    src/limbs/taskfactory.cpp
 
 HEADERS  += \
+    src/limbs/basictask.h \
+    src/models/taskmodel.h \
     src/ui/mainwindow.h \
     src/ui/tasktreewidget.h \
-    src/ui/tasktreeview.h
+    src/ui/tasktreeview.h \
+    src/limbs/taskfactory.h
 
 FORMS    += \
     src/ui/mainwindow.ui \
