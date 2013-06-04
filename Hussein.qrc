@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>hussein.ico</file>
+    </qresource>
+</RCC>
