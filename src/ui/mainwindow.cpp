@@ -1,12 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "../limbs/basictask.h"
-#include "../serialization/jsonserialization.h"
-
 #include "tasktreewidget.h"
 
-#include <QtCore/QFile>
+#include <QtWidgets/QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,31 +11,101 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	_rootTask = new BasicTask(0);
-	_rootTask->setDescription(tr("(root)"));
+	setupActions();
 
-	QFile file("test.json");
-
-	if ( file.open(QIODevice::ReadOnly|QIODevice::Text) )
-	{
-		QByteArray data = file.readAll();
-		JsonSerialization::deserialize(_rootTask, data);
-		file.close();
-	}
-
-	setCentralWidget( new TaskTreeWidget(_rootTask, this) );
+	//setCentralWidget( new TaskTreeWidget(_rootTask, this) );
 }
 
 MainWindow::~MainWindow()
 {
-	QFile file("test.json");
+	delete ui;
+}
 
-	if ( file.open(QIODevice::WriteOnly|QIODevice::Text) )
+void MainWindow::newFile()
+{
+	ui->tabWidget->addTab(new TaskTreeWidget(this), tr("New tasklist"));
+}
+
+void MainWindow::openFile()
+{
+	QStringList fileNames = QFileDialog::getOpenFileNames(this,
+	                                                      tr("Open tasklist(s)..."),
+	                                                      QString(),
+	                                                      tr("Tasklist (*.json);;Any (*.*)"));
+
+	if ( fileNames.empty() )
+		return;
+
+	foreach(const QString &fileName, fileNames)
 	{
-		file.write(JsonSerialization::serialize(_rootTask));
-		file.flush();
-		file.close();
+		QFileInfo fileInfo(fileName);
+		TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
+
+		taskTreeWidget->setFileName(fileName);
+		taskTreeWidget->open();
+
+		ui->tabWidget->addTab(taskTreeWidget, fileInfo.baseName());
+	}
+}
+
+void MainWindow::saveFile()
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+
+	if ( !taskTreeWidget )
+		return;
+
+	if ( taskTreeWidget->fileName().isEmpty() )
+	{
+		QString fileName = QFileDialog::getSaveFileName(this,
+		                                                tr("Save tasklist"),
+		                                                QString(),
+		                                                tr("Tasklist (*.json)"));
+
+		if ( fileName.isEmpty() )
+			return;
+
+		taskTreeWidget->setFileName(fileName);
 	}
 
-	delete ui;
+	taskTreeWidget->save();
+}
+
+void MainWindow::saveAsFile()
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+
+	if ( !taskTreeWidget )
+		return;
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save tasklist"),
+													QString(),
+													tr("Tasklist (*.json)"));
+
+	if ( fileName.isEmpty() )
+		return;
+
+	taskTreeWidget->setFileName(fileName);
+
+	taskTreeWidget->save();
+}
+
+void MainWindow::setupActions()
+{
+	connect(ui->actionNew, &QAction::triggered,
+	        this, &MainWindow::newFile);
+
+	connect(ui->actionOpen, &QAction::triggered,
+	        this, &MainWindow::openFile);
+
+	connect(ui->actionSave, &QAction::triggered,
+	        this, &MainWindow::saveFile);
+
+	connect(ui->actionSaveAs, &QAction::triggered,
+	        this, &MainWindow::saveAsFile);
+
+
+	connect(ui->actionQuit, &QAction::triggered,
+	        this, &MainWindow::close);
 }

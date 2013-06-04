@@ -13,7 +13,10 @@ class JsonSerialization
 		explicit JsonSerialization();
 
 		static QByteArray serialize(BasicTask *root);
-		static void deserialize(BasicTask *root, const QByteArray &json);
+		static bool serialize(const QString &fileName, BasicTask *root);
+
+		static void deserialize(const QByteArray &json, BasicTask *root);
+		static bool deserialize(const QString &fileName, BasicTask *root);
 
 	private:
 		static void serializeTask(QJsonArray &list, BasicTask *task);

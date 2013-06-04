@@ -3,8 +3,6 @@
 
 #include <QtWidgets/QMainWindow>
 
-class BasicTask;
-
 namespace Ui
 {
 	class MainWindow;
@@ -18,8 +16,14 @@ class MainWindow : public QMainWindow
 		explicit MainWindow(QWidget *parent = 0);
 		~MainWindow();
 
+	private slots:
+		void newFile();
+		void openFile();
+		void saveFile();
+		void saveAsFile();
+
 	private:
-		BasicTask *_rootTask;
+		void setupActions();
 
 		Ui::MainWindow *ui;
 };
