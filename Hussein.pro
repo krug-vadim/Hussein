@@ -10,7 +10,8 @@ SOURCES += \
     src/ui/mainwindow.cpp \
     src/ui/tasktreewidget.cpp \
     src/ui/tasktreeview.cpp \
-    src/limbs/taskfactory.cpp
+    src/limbs/taskfactory.cpp \
+    src/serialization/jsonserialization.cpp
 
 HEADERS  += \
     src/limbs/basictask.h \
@@ -18,7 +19,8 @@ HEADERS  += \
     src/ui/mainwindow.h \
     src/ui/tasktreewidget.h \
     src/ui/tasktreeview.h \
-    src/limbs/taskfactory.h
+    src/limbs/taskfactory.h \
+    src/serialization/jsonserialization.h
 
 FORMS    += \
     src/ui/mainwindow.ui \

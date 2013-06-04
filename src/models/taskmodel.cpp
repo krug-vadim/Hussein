@@ -75,29 +75,6 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 	if ( !index.isValid() )
 		return QVariant();
 
-//	if ( root() && root()->subtasks().empty() )
-//	{
-//		switch ( role )
-//		{
-//			case Qt::DisplayRole:
-//				return tr("To begin type here...");
-//				break;
-
-//			case Qt::FontRole:
-//				font.setItalic(true);
-//				return font;
-//				break;
-
-//			case Qt::ForegroundRole:
-//				return palette.color(QPalette::Disabled, QPalette::Text);
-//				break;
-
-//			default:
-//				return QVariant();
-//				break;
-//		}
-//	}
-
 	task = static_cast<BasicTask *>(index.internalPointer());
 
 	switch ( role )
@@ -115,6 +92,11 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 			else
 				return QVariant();
 			break;
+
+//			case Qt::FontRole:
+//				font.setItalic(true);
+//				return font;
+//				break;
 	}
 
 	return QVariant();
