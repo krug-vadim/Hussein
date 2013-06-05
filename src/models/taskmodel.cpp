@@ -158,8 +158,15 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 	BasicTask *task;
 
 	nextIndex = index;
+	while ( rowCount(nextIndex) > 0 )
+	{
+		qDebug() << nextIndex << rowCount(nextIndex);
+		nextIndex = nextIndex.child(rowCount(index)-1, columnCount(nextIndex)-1);
+	}
+
 	task = getTask(index);
 
+	qDebug() << "rowCount" << rowCount(index);
 	qDebug() << "setData" << index << nextIndex;
 
 	if ( !task )
@@ -175,7 +182,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 		case TaskDoneRole:
 			task->setDone(value.toBool());
-			nextIndex = this->index(index.row() + 1, index.column(), index.parent());
+			//nextIndex = this->index(index.row() + 1, index.column(), index.parent());
 			result = true;
 			break;
 

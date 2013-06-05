@@ -32,6 +32,7 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	        this, &TaskTreeWidget::showDoneChanged);
 
 	ui->tasksView->setModel(_taskProxyModel);
+	//ui->tasksView->setModel(_taskModel);
 
 
 	ui->tasksView->setFocus();
