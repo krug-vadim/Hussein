@@ -1,50 +1,48 @@
-#include "basictask.h"
+#include "task.h"
 
-BasicTask::BasicTask(TaskModel *model)
-{
-	_model = model;
-	clear();
-}
-
-
-BasicTask::~BasicTask()
+Task::Task(Task *parent)
+    : _parent(parent)
 {
 	clear();
 }
 
+Task::~Task()
+{
+	clear();
+}
 
-BasicTask *BasicTask::parent() const
+
+Task *Task::parent() const
 {
 	return _parent;
 }
 
-
-void BasicTask::setParent(BasicTask *parent)
+void Task::setParent(Task *parent)
 {
 	_parent = parent;
 }
 
-const QString &BasicTask::description() const
+const QString &Task::description() const
 {
 	return _description;
 }
 
-void BasicTask::setDescription(const QString &description)
+void Task::setDescription(const QString &description)
 {
 	_description = description;
 }
 
-bool BasicTask::isDone() const
+bool Task::isDone() const
 {
 	return _done;
 }
 
-bool BasicTask::isAboveDone() const
+bool Task::isAboveDone() const
 {
 	if ( isDone() )
 		return true;
 
-	const BasicTask *p = static_cast<const BasicTask *>(this);
+	const Task *p = static_cast<const Task *>(this);
 	while ( (p = p->parent()) )
 	{
 		if ( p->isDone() )
@@ -54,22 +52,22 @@ bool BasicTask::isAboveDone() const
 	return false;
 }
 
-void BasicTask::setDone(const bool done)
+void Task::setDone(const bool done)
 {
 	_done = done;
 }
 
-bool BasicTask::isExpanded() const
+bool Task::isExpanded() const
 {
 	return _expanded;
 }
 
-void BasicTask::setExpanded(const bool expanded)
+void Task::setExpanded(const bool expanded)
 {
 	_expanded = expanded;
 }
 
-void BasicTask::clear()
+void Task::clear()
 {
 	_done = false;
 	_expanded = false;
@@ -78,12 +76,12 @@ void BasicTask::clear()
 	_subtasks.clear();
 }
 
-const TaskList &BasicTask::subtasks() const
+const TaskList &Task::subtasks() const
 {
 	return _subtasks;
 }
 
-bool BasicTask::appendSubtask(BasicTask *task)
+bool Task::appendSubtask(Task *task)
 {
 	if ( !task )
 		return false;
@@ -94,7 +92,7 @@ bool BasicTask::appendSubtask(BasicTask *task)
 	return true;
 }
 
-bool BasicTask::insertSubtask(BasicTask *task, int position)
+bool Task::insertSubtask(Task *task, int position)
 {
 	if ( position < 0 || position > subtasks().size() )
 		return false;
@@ -108,7 +106,7 @@ bool BasicTask::insertSubtask(BasicTask *task, int position)
 	return true;
 }
 
-bool BasicTask::removeSubtask(int position)
+bool Task::removeSubtask(int position)
 {
 	if ( position < 0 || position > subtasks().size() )
 		return false;
@@ -119,15 +117,10 @@ bool BasicTask::removeSubtask(int position)
 	return true;
 }
 
-int BasicTask::row() const
+int Task::row() const
 {
 	if ( !parent() )
 		return -1;
 
-	return parent()->subtasks().indexOf( const_cast<BasicTask *>(this) );
-}
-
-TaskModel *BasicTask::model() const
-{
-	return _model;
+	return parent()->subtasks().indexOf( const_cast<Task *>(this) );
 }

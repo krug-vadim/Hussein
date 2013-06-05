@@ -3,7 +3,7 @@
 
 #include <QtWidgets/QWidget>
 
-class BasicTask;
+class Task;
 class TaskModel;
 class TaskSortFilterProxyModel;
 
@@ -20,7 +20,7 @@ class TaskTreeWidget : public QWidget
 		explicit TaskTreeWidget(QWidget *parent = 0);
 		~TaskTreeWidget();
 
-		BasicTask *root() const;
+		Task *root() const;
 
 		QString fileName() const;
 		void setFileName(const QString &fileName);
@@ -32,7 +32,7 @@ class TaskTreeWidget : public QWidget
 		void showDoneChanged(int state);
 
 	private:
-		BasicTask *_rootTask;
+		Task *_rootTask;
 
 		TaskModel *_taskModel;
 		TaskSortFilterProxyModel *_taskProxyModel;

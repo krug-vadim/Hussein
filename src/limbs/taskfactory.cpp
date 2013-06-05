@@ -1,13 +1,13 @@
 #include "taskfactory.h"
 
-#include "basictask.h"
+#include "task.h"
 
 TaskFactory::TaskFactory(QObject *parent) :
     QObject(parent)
 {
 }
 
-BasicTask *TaskFactory::create(TaskModel *model)
+Task *TaskFactory::create(Task *parent)
 {
-	return new BasicTask(model);
+	return new Task(parent);
 }

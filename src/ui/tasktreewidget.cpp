@@ -1,7 +1,7 @@
 #include "tasktreewidget.h"
 #include "ui_tasktreewidget.h"
 
-#include "../limbs/basictask.h"
+#include "../limbs/task.h"
 #include "../limbs/taskfactory.h"
 #include "../models/taskmodel.h"
 #include "../models/tasksortfilterproxymodel.h"
@@ -14,7 +14,7 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	_rootTask = new BasicTask(0);
+	_rootTask = new Task(0);
 	_rootTask->setDescription(tr("(root)"));
 
 	_fileName = QString();
@@ -43,7 +43,7 @@ TaskTreeWidget::~TaskTreeWidget()
 	delete ui;
 }
 
-BasicTask *TaskTreeWidget::root() const
+Task *TaskTreeWidget::root() const
 {
 	return _rootTask;
 }

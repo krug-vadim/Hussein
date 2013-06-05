@@ -1,24 +1,22 @@
-#ifndef BASICTASK_H
-#define BASICTASK_H
+#ifndef TASK_H
+#define TASK_H
 
 #include <QtCore/QObject>
 #include <QtCore/QList>
 
-class TaskModel;
-class BasicTask;
-typedef QList<BasicTask *> TaskList;
+class Task;
+typedef QList<Task *> TaskList;
 
-class BasicTask : public QObject
+class Task : public QObject
 {
 	Q_OBJECT
 
 	public:
-		//BasicTask(BasicTask *parent = 0);
-		BasicTask(TaskModel *model = 0);
-		virtual ~BasicTask();
+		Task(Task *parent = 0);
+		virtual ~Task();
 
-		BasicTask *parent() const;
-		void setParent(BasicTask *parent);
+		Task *parent() const;
+		void setParent(Task *parent);
 
 		const QString &description() const;
 		void setDescription(const QString &description);
@@ -34,17 +32,14 @@ class BasicTask : public QObject
 
 		const TaskList &subtasks() const;
 
-		bool appendSubtask(BasicTask *task);
-		bool insertSubtask(BasicTask *task, int position);
+		bool appendSubtask(Task *task);
+		bool insertSubtask(Task *task, int position);
 		bool removeSubtask(int position);
 
 		int row() const;
 
 	private:
-		TaskModel *model() const;
-
-		BasicTask *_parent;
-		TaskModel *_model;
+		Task *_parent;
 
 		QString    _description;
 		bool       _done;
@@ -53,4 +48,4 @@ class BasicTask : public QObject
 		TaskList   _subtasks;
 };
 
-#endif // BASICTASK_H
+#endif // TASK_H

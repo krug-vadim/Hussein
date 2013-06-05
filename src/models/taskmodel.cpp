@@ -1,6 +1,6 @@
 #include "taskmodel.h"
 
-#include "../limbs/basictask.h"
+#include "../limbs/task.h"
 #include "../limbs/taskfactory.h"
 
 #include <QtGui/QFont>
@@ -23,7 +23,7 @@ QModelIndex TaskModel::index(int row, int column, const QModelIndex &parent) con
 	if ( !hasIndex(row, column, parent) )
 		return QModelIndex();
 
-	BasicTask *parentTask = getTask(parent);
+	Task *parentTask = getTask(parent);
 
 	if ( !parentTask )
 		return QModelIndex();
@@ -39,8 +39,8 @@ QModelIndex TaskModel::parent(const QModelIndex &index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	BasicTask *subTask;
-	BasicTask *parentTask;
+	Task *subTask;
+	Task *parentTask;
 
 	subTask = getTask(index);
 	parentTask = subTask->parent();
@@ -64,12 +64,12 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 {
 	QFont font;
 	QPalette palette;
-	BasicTask *task;
+	Task *task;
 
 	if ( !index.isValid() )
 		return QVariant();
 
-	task = static_cast<BasicTask *>(index.internalPointer());
+	task = static_cast<Task *>(index.internalPointer());
 
 	switch ( role )
 	{
@@ -135,7 +135,7 @@ QVariant TaskModel::headerData(int section, Qt::Orientation orientation, int rol
 
 int TaskModel::rowCount(const QModelIndex &parent) const
 {
-	BasicTask *parentTask;
+	Task *parentTask;
 
 	parentTask = getTask(parent);
 
@@ -154,7 +154,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 {
 	bool result;
 	QModelIndex nextIndex;
-	BasicTask *task;
+	Task *task;
 
 	nextIndex = index;
 	while ( rowCount(nextIndex) > 0 )
@@ -210,7 +210,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
-	BasicTask *parentTask = getTask(parent);
+	Task *parentTask = getTask(parent);
 
 	if ( !parentTask )
 		return false;
@@ -222,7 +222,7 @@ bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 
 	beginInsertRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-		success &= parentTask->insertSubtask(taskFactory()->create(this), position);
+		success &= parentTask->insertSubtask(taskFactory()->create(), position);
 	endInsertRows();
 
 	return success;
@@ -230,7 +230,7 @@ bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 
 bool TaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
-	BasicTask *parentTask = getTask(parent);
+	Task *parentTask = getTask(parent);
 
 	if ( !parentTask )
 		return false;
@@ -247,8 +247,8 @@ bool TaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 
 bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
 {
-	BasicTask *fromTask = getTask(sourceParent);
-	BasicTask *toTask = getTask(destinationParent);
+	Task *fromTask = getTask(sourceParent);
+	Task *toTask = getTask(destinationParent);
 
 	if ( !fromTask || !toTask )
 		return false;
@@ -260,7 +260,7 @@ bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int cou
 
 	for(int i = 0; i < count; i++, sourceRow++, destinationChild++)
 	{
-		BasicTask *current;
+		Task *current;
 
 		current = fromTask->subtasks().at(sourceRow);
 		fromTask->removeSubtask(sourceRow);
@@ -273,12 +273,12 @@ bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int cou
 	return success;
 }
 
-BasicTask *TaskModel::root() const
+Task *TaskModel::root() const
 {
 	return _root;
 }
 
-void TaskModel::setRoot(BasicTask *root)
+void TaskModel::setRoot(Task *root)
 {
 	beginResetModel();
 	_root = root;
@@ -295,10 +295,10 @@ void TaskModel::setTaskFactory(TaskFactory *factory)
 	_taskFactory = factory;
 }
 
-BasicTask *TaskModel::getTask(const QModelIndex &index) const
+Task *TaskModel::getTask(const QModelIndex &index) const
 {
 	if ( index.isValid() )
-		return static_cast<BasicTask *>(index.internalPointer());
+		return static_cast<Task *>(index.internalPointer());
 	else
 		return _root;
 }

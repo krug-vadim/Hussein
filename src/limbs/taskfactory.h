@@ -3,7 +3,7 @@
 
 #include <QtCore/QObject>
 
-class BasicTask;
+class Task;
 
 class TaskFactory : public QObject
 {
@@ -12,7 +12,7 @@ class TaskFactory : public QObject
 	public:
 		explicit TaskFactory(QObject *parent = 0);
 
-		BasicTask *create(TaskModel *model);
+		Task *create(Task *parent = 0);
 };
 
 #endif // TASKFACTORY_H

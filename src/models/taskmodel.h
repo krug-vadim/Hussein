@@ -3,7 +3,7 @@
 
 #include <QtCore/QAbstractItemModel>
 
-class BasicTask;
+class Task;
 class TaskFactory;
 
 class TaskModel : public QAbstractItemModel
@@ -37,18 +37,16 @@ class TaskModel : public QAbstractItemModel
 		bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex());
 		bool moveRows(const QModelIndex & sourceParent, int sourceRow, int count, const QModelIndex & destinationParent, int destinationChild);
 
-		BasicTask *root() const;
-		void setRoot(BasicTask *root);
+		Task *root() const;
+		void setRoot(Task *root);
 
 		TaskFactory *taskFactory() const;
 		void setTaskFactory(TaskFactory *factory);
 
-		friend class BasicTask;
-
 	private:
-		BasicTask *getTask(const QModelIndex &index) const;
+		Task *getTask(const QModelIndex &index) const;
 
-		BasicTask *_root;
+		Task *_root;
 
 		TaskFactory *_taskFactory;
 };

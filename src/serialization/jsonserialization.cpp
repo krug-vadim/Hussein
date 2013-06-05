@@ -6,18 +6,18 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QJsonArray>
 
-#include "../limbs/basictask.h"
+#include "../limbs/task.h"
 
 JsonSerialization::JsonSerialization()
 {
 }
 
-QByteArray JsonSerialization::serialize(BasicTask *root)
+QByteArray JsonSerialization::serialize(Task *root)
 {
 	QJsonObject object;
 	QJsonArray childs;
 
-	foreach(BasicTask *task, root->subtasks())
+	foreach(Task *task, root->subtasks())
 		serializeTask(childs, task);
 
 	object.insert(QString("tasks"), QJsonValue(childs));
@@ -27,7 +27,7 @@ QByteArray JsonSerialization::serialize(BasicTask *root)
 	return jsonDocument.toJson();
 }
 
-bool JsonSerialization::serialize(const QString &fileName, BasicTask *root)
+bool JsonSerialization::serialize(const QString &fileName, Task *root)
 {
 	QFile file(fileName);
 
@@ -42,7 +42,7 @@ bool JsonSerialization::serialize(const QString &fileName, BasicTask *root)
 		return false;
 }
 
-void JsonSerialization::deserialize(const QByteArray &json, BasicTask *root)
+void JsonSerialization::deserialize(const QByteArray &json, Task *root)
 {
 	QJsonParseError error;
 
@@ -72,7 +72,7 @@ void JsonSerialization::deserialize(const QByteArray &json, BasicTask *root)
 		root->appendSubtask( deserializeTask(child.toObject()) );
 }
 
-bool JsonSerialization::deserialize(const QString &fileName, BasicTask *root)
+bool JsonSerialization::deserialize(const QString &fileName, Task *root)
 {
 	QFile file(fileName);
 
@@ -87,7 +87,7 @@ bool JsonSerialization::deserialize(const QString &fileName, BasicTask *root)
 		return false;
 }
 
-void JsonSerialization::serializeTask(QJsonArray &list, BasicTask *task)
+void JsonSerialization::serializeTask(QJsonArray &list, Task *task)
 {
 	QJsonObject object;
 	QJsonArray childs;
@@ -96,7 +96,7 @@ void JsonSerialization::serializeTask(QJsonArray &list, BasicTask *task)
 	object.insert(QString("done"), QJsonValue(task->isDone()));
 	object.insert(QString("expanded"), QJsonValue(task->isExpanded()));
 
-	foreach(BasicTask *subTask, task->subtasks())
+	foreach(Task *subTask, task->subtasks())
 		serializeTask(childs, subTask);
 
 	if ( !childs.empty() )
@@ -106,12 +106,12 @@ void JsonSerialization::serializeTask(QJsonArray &list, BasicTask *task)
 }
 
 
-BasicTask *JsonSerialization::deserializeTask(const QJsonObject &object)
+Task *JsonSerialization::deserializeTask(const QJsonObject &object)
 {
 	if ( object.isEmpty() )
 		return 0;
 
-	BasicTask *task = new BasicTask();
+	Task *task = new Task();
 
 	task->setDescription(object.value(QString("description")).toString());
 	task->setDone(object.value(QString("done")).toBool());
