@@ -43,9 +43,7 @@ class TaskModel : public QAbstractItemModel
 		TaskFactory *taskFactory() const;
 		void setTaskFactory(TaskFactory *factory);
 
-	public slots:
-		void rootAboutToBeChanged();
-		void rootChanged();
+		friend class BasicTask;
 
 	private:
 		BasicTask *getTask(const QModelIndex &index) const;

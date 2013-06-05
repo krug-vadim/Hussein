@@ -1,8 +1,8 @@
 #include "basictask.h"
 
-BasicTask::BasicTask(BasicTask *parent)
-    : _parent(parent)
+BasicTask::BasicTask(TaskModel *model)
 {
+	_model = model;
 	clear();
 }
 
@@ -125,4 +125,9 @@ int BasicTask::row() const
 		return -1;
 
 	return parent()->subtasks().indexOf( const_cast<BasicTask *>(this) );
+}
+
+TaskModel *BasicTask::model() const
+{
+	return _model;
 }

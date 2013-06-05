@@ -12,7 +12,6 @@ TaskModel::TaskModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
 	_root = 0;
-
 }
 
 TaskModel::~TaskModel()
@@ -223,7 +222,7 @@ bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 
 	beginInsertRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-		success &= parentTask->insertSubtask(taskFactory()->create(), position);
+		success &= parentTask->insertSubtask(taskFactory()->create(this), position);
 	endInsertRows();
 
 	return success;
@@ -294,17 +293,6 @@ TaskFactory *TaskModel::taskFactory() const
 void TaskModel::setTaskFactory(TaskFactory *factory)
 {
 	_taskFactory = factory;
-}
-
-void TaskModel::rootAboutToBeChanged()
-{
-	emit layoutAboutToBeChanged();
-}
-
-void TaskModel::rootChanged()
-{
-	//changePersistentIndex()
-	emit layoutChanged();
 }
 
 BasicTask *TaskModel::getTask(const QModelIndex &index) const

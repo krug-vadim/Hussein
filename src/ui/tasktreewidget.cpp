@@ -64,10 +64,7 @@ bool TaskTreeWidget::open()
 
 	if ( !fileName().isEmpty() )
 	{
-		_taskModel->rootAboutToBeChanged();
 		bool result = JsonSerialization::deserialize(fileName(), _rootTask);
-		_taskModel->rootChanged();
-
 		ui->tasksView->expandTasks();
 		return result;
 	}

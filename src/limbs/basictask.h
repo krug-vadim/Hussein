@@ -4,6 +4,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QList>
 
+class TaskModel;
 class BasicTask;
 typedef QList<BasicTask *> TaskList;
 
@@ -12,7 +13,8 @@ class BasicTask : public QObject
 	Q_OBJECT
 
 	public:
-		BasicTask(BasicTask *parent = 0);
+		//BasicTask(BasicTask *parent = 0);
+		BasicTask(TaskModel *model = 0);
 		virtual ~BasicTask();
 
 		BasicTask *parent() const;
@@ -39,7 +41,10 @@ class BasicTask : public QObject
 		int row() const;
 
 	private:
+		TaskModel *model() const;
+
 		BasicTask *_parent;
+		TaskModel *_model;
 
 		QString    _description;
 		bool       _done;
