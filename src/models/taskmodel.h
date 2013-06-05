@@ -43,6 +43,9 @@ class TaskModel : public QAbstractItemModel
 		TaskFactory *taskFactory() const;
 		void setTaskFactory(TaskFactory *factory);
 
+		void aboutUpdateModel();
+		void updateModel();
+
 	public slots:
 		void taskChanged(const QList<int> &path);
 

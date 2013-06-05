@@ -18,7 +18,19 @@ Task *Task::parent() const
 
 void Task::setParent(Task *parent)
 {
+	if ( _parent )
+	{
+		disconnect(this, SIGNAL(changed(QList<int>)),
+		           _parent, SIGNAL(changed(QList<int>)));
+	}
+
 	_parent = parent;
+
+	if ( _parent )
+	{
+		connect(this, SIGNAL(changed(QList<int>)),
+		        _parent, SIGNAL(changed(QList<int>)));
+	}
 }
 
 const QString &Task::description() const
@@ -54,6 +66,7 @@ bool Task::isAboveDone() const
 void Task::setDone(const bool done)
 {
 	_done = done;
+	changeNotifyRecursive();
 }
 
 bool Task::isExpanded() const

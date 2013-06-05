@@ -23,6 +23,9 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_taskModel->setRoot(_rootTask);
 	_taskModel->setTaskFactory(new TaskFactory(this));
 
+	connect(_rootTask, SIGNAL(changed(QList<int>)),
+	        _taskModel, SLOT(taskChanged(QList<int>)));
+
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);
 	_taskProxyModel->setDynamicSortFilter(true);
@@ -64,7 +67,10 @@ bool TaskTreeWidget::open()
 
 	if ( !fileName().isEmpty() )
 	{
+		_taskModel->aboutUpdateModel();
 		bool result = JsonSerialization::deserialize(fileName(), _rootTask);
+		_taskModel->updateModel();
+
 		ui->tasksView->expandTasks();
 		return result;
 	}

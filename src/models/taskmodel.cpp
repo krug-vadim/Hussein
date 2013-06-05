@@ -157,11 +157,6 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 	Task *task;
 
 	nextIndex = index;
-	while ( rowCount(nextIndex) > 0 )
-	{
-		qDebug() << nextIndex << rowCount(nextIndex);
-		nextIndex = nextIndex.child(rowCount(index)-1, columnCount(nextIndex)-1);
-	}
 
 	task = getTask(index);
 
@@ -295,8 +290,19 @@ void TaskModel::setTaskFactory(TaskFactory *factory)
 	_taskFactory = factory;
 }
 
+void TaskModel::aboutUpdateModel()
+{
+	emit layoutAboutToBeChanged();
+}
+
+void TaskModel::updateModel()
+{
+	emit layoutChanged();
+}
+
 void TaskModel::taskChanged(const QList<int> &path)
 {
+	qDebug() << "taskChanged" << path;
 	QModelIndex index = pathToIndex(path);
 	emit dataChanged(index, index);
 }
@@ -305,8 +311,9 @@ QModelIndex TaskModel::pathToIndex(const QList<int> &path) const
 {
 	QModelIndex index = QModelIndex();
 
-	foreach(int row, path)
-		index = index.child(row, 0);
+	while(!path.empty())
+	//foreach(int row, path)
+		index = index.child(path.takeLast(), 0);
 
 	return index;
 }
