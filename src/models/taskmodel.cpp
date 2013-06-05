@@ -76,21 +76,31 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 		case Qt::DisplayRole:
 			if ( index.column() == 0 )
 				return ( task->description().isEmpty() ) ? tr("(empty)") : task->description();
-			else
-				return QVariant();
 			break;
 
 		case Qt::ForegroundRole:
 			if ( index.column() == 0 && task->description().isEmpty() )
 				return palette.color(QPalette::Disabled, QPalette::Text);
-			else
-				return QVariant();
+			if ( index.column() == 0 && task->isAboveDone() )
+				return palette.color(QPalette::Disabled, QPalette::Text);
 			break;
 
-//			case Qt::FontRole:
-//				font.setItalic(true);
-//				return font;
-//				break;
+		case Qt::FontRole:
+			if ( index.column() == 0 && task->isDone())
+			{
+				font.setStrikeOut(true);
+				return font;
+			}
+			break;
+
+		case TaskModel::TaskDoneRole:
+			return task->isDone();
+			break;
+
+		case TaskModel::TaskExpandedRole:
+			return task->isExpanded();
+			break;
+
 	}
 
 	return QVariant();
@@ -122,13 +132,7 @@ int TaskModel::rowCount(const QModelIndex &parent) const
 {
 	BasicTask *parentTask;
 
-	if ( parent.column() > 0 )
-		return 0;
-
 	parentTask = getTask(parent);
-
-	if ( !parentTask )
-		return 0;
 
 	return parentTask->subtasks().size();
 }
@@ -157,18 +161,18 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 			result = true;
 			break;
 
-		/*case TaskDoneRole:
-			item->setDone(value.toBool());
-			result = true;
-			break;
-
-		case TaskDoneToggleRole:
-			item->setDone(!item->isDone());
+		case TaskDoneRole:
+			task->setDone(value.toBool());
 			result = true;
 			break;
 
 		case TaskExpandedRole:
-			item->setExpanded(value.toBool());
+			task->setExpanded(value.toBool());
+			result = true;
+			break;
+
+		/*case TaskDoneToggleRole:
+			item->setDone(!item->isDone());
 			result = true;
 			break;*/
 

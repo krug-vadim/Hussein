@@ -94,6 +94,7 @@ void JsonSerialization::serializeTask(QJsonArray &list, BasicTask *task)
 
 	object.insert(QString("description"), QJsonValue(task->description()));
 	object.insert(QString("done"), QJsonValue(task->isDone()));
+	object.insert(QString("expanded"), QJsonValue(task->isExpanded()));
 
 	foreach(BasicTask *subTask, task->subtasks())
 		serializeTask(childs, subTask);
@@ -114,6 +115,7 @@ BasicTask *JsonSerialization::deserializeTask(const QJsonObject &object)
 
 	task->setDescription(object.value(QString("description")).toString());
 	task->setDone(object.value(QString("done")).toBool());
+	task->setExpanded(object.value(QString("expanded")).toBool());
 
 	QJsonValue childsValue = object.value(QString("tasks"));
 

@@ -5,6 +5,10 @@
 #include <QtGui/QPalette>
 #include <QtGui/QFont>
 
+#include "../models/taskmodel.h"
+
+#include <QDebug>
+
 TaskTreeView::TaskTreeView(QWidget *parent)
     : QTreeView(parent)
 {
@@ -15,6 +19,16 @@ TaskTreeView::TaskTreeView(QWidget *parent)
 	               |QAbstractItemView::EditKeyPressed);
 	setAllColumnsShowFocus(true);
 	setHeaderHidden(false);
+
+	connect(this, &TaskTreeView::collapsed,
+	        this, &TaskTreeView::taskCollapsed);
+	connect(this, &TaskTreeView::expanded,
+	        this, &TaskTreeView::taskExpanded);
+}
+
+void TaskTreeView::setModel(QAbstractItemModel *model)
+{
+	QTreeView::setModel(model);
 }
 
 void TaskTreeView::keyPressEvent(QKeyEvent *event)
@@ -89,6 +103,39 @@ void TaskTreeView::paintEvent(QPaintEvent *event)
 	}
 	else
 		QTreeView::paintEvent(event);
+}
+
+void TaskTreeView::taskCollapsed(const QModelIndex &index)
+{
+	qDebug() << "collapsed" << index;
+	model()->setData(index, false, TaskModel::TaskExpandedRole);
+}
+
+void TaskTreeView::taskExpanded(const QModelIndex &index)
+{
+	qDebug() << "expanded" << index;
+	model()->setData(index, true, TaskModel::TaskExpandedRole);
+}
+
+void TaskTreeView::expandTasks()
+{
+	QModelIndexList indexes;
+
+	qDebug() << "expandTasks" << model()->rowCount();
+	for(int i = 0;i < model()->rowCount(); i++)
+	{
+		qDebug() << "expanding" << model()->index(i, 0) << model()->data(model()->index(i, 0));
+		expandTask(model()->index(i, 0));
+	}
+}
+
+void TaskTreeView::expandTask(const QModelIndex &index)
+{
+	qDebug() << "expandTask" << index << model()->data(index);
+	setExpanded(index, model()->data(index, TaskModel::TaskExpandedRole).toBool());
+
+	for(int i = 0; i < model()->rowCount(index); i++)
+		expandTask(index.child(i, 0));
 }
 
 void TaskTreeView::addTask()
@@ -181,4 +228,10 @@ void TaskTreeView::changeCurrentToTask()
 
 void TaskTreeView::toggleTaskDone()
 {
+	QModelIndex index = selectionModel()->currentIndex();
+
+	if ( !index.isValid() )
+		return;
+
+	model()->setData(index, !model()->data(index, TaskModel::TaskDoneRole).toBool(), TaskModel::TaskDoneRole);
 }

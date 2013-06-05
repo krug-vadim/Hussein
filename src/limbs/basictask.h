@@ -22,10 +22,11 @@ class BasicTask : public QObject
 		void setDescription(const QString &description);
 
 		bool isDone() const;
+		bool isAboveDone() const;
 		void setDone(const bool done);
 
-		bool isCollapsed() const;
-		void setCollapsed(const bool collapsed);
+		bool isExpanded() const;
+		void setExpanded(const bool expanded);
 
 		void clear();
 
@@ -42,7 +43,7 @@ class BasicTask : public QObject
 
 		QString    _description;
 		bool       _done;
-		bool       _collapsed;
+		bool       _expanded;
 
 		TaskList   _subtasks;
 };

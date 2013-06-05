@@ -39,25 +39,40 @@ bool BasicTask::isDone() const
 	return _done;
 }
 
+bool BasicTask::isAboveDone() const
+{
+	if ( isDone() )
+		return true;
+
+	const BasicTask *p = static_cast<const BasicTask *>(this);
+	while ( (p = p->parent()) )
+	{
+		if ( p->isDone() )
+			return true;
+	}
+
+	return false;
+}
+
 void BasicTask::setDone(const bool done)
 {
 	_done = done;
 }
 
-bool BasicTask::isCollapsed() const
+bool BasicTask::isExpanded() const
 {
-	return _collapsed;
+	return _expanded;
 }
 
-void BasicTask::setCollapsed(const bool collapsed)
+void BasicTask::setExpanded(const bool expanded)
 {
-	_collapsed = collapsed;
+	_expanded = expanded;
 }
 
 void BasicTask::clear()
 {
 	_done = false;
-	_collapsed = false;
+	_expanded = false;
 
 	qDeleteAll(_subtasks);
 	_subtasks.clear();

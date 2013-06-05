@@ -52,7 +52,11 @@ bool TaskTreeWidget::open()
 	_rootTask->clear();
 
 	if ( !fileName().isEmpty() )
-		return JsonSerialization::deserialize(fileName(), _rootTask);
+	{
+		bool result = JsonSerialization::deserialize(fileName(), _rootTask);
+		ui->tasksView->expandTasks();
+		return result;
+	}
 	else
 		return false;
 }

@@ -12,12 +12,22 @@ class TaskTreeView : public QTreeView
 	public:
 		explicit TaskTreeView(QWidget *parent = 0);
 
+		virtual void setModel(QAbstractItemModel *model);
+
+		void expandTasks();
+
 	signals:
 		void changed();
 
 	protected:
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void paintEvent(QPaintEvent *event);
+
+	private slots:
+		void taskCollapsed(const QModelIndex &index);
+		void taskExpanded(const QModelIndex &index);
+
+		void expandTask(const QModelIndex &index);
 
 	private:
 		void addTask();

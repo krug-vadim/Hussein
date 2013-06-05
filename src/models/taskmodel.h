@@ -11,6 +11,13 @@ class TaskModel : public QAbstractItemModel
 	Q_OBJECT
 
 	public:
+		enum
+		{
+			TaskDoneRole = Qt::UserRole,
+			TaskExpandedRole,
+		}
+		TaskDataRole;
+
 		explicit TaskModel(QObject *parent = 0);
 		~TaskModel();
 
