@@ -38,7 +38,15 @@ class Task : public QObject
 
 		int row() const;
 
+	signals:
+		void changed(const QList<int> &path);
+
 	private:
+		void changeNotify();
+		void changeNotifyRecursive();
+
+		void getPath(QList<int> &path);
+
 		Task *_parent;
 
 		QString    _description;

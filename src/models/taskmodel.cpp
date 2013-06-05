@@ -295,6 +295,22 @@ void TaskModel::setTaskFactory(TaskFactory *factory)
 	_taskFactory = factory;
 }
 
+void TaskModel::taskChanged(const QList<int> &path)
+{
+	QModelIndex index = pathToIndex(path);
+	emit dataChanged(index, index);
+}
+
+QModelIndex TaskModel::pathToIndex(const QList<int> &path) const
+{
+	QModelIndex index = QModelIndex();
+
+	foreach(int row, path)
+		index = index.child(row, 0);
+
+	return index;
+}
+
 Task *TaskModel::getTask(const QModelIndex &index) const
 {
 	if ( index.isValid() )

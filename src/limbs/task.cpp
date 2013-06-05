@@ -11,7 +11,6 @@ Task::~Task()
 	clear();
 }
 
-
 Task *Task::parent() const
 {
 	return _parent;
@@ -123,4 +122,29 @@ int Task::row() const
 		return -1;
 
 	return parent()->subtasks().indexOf( const_cast<Task *>(this) );
+}
+
+void Task::getPath(QList<int> &path)
+{
+	path.clear();
+
+	for(Task *current = this; current->row() != -1; current = current->parent())
+		path.append(current->row());
+}
+
+void Task::changeNotify()
+{
+	QList<int> path;
+
+	getPath(path);
+
+	emit changed(path);
+}
+
+void Task::changeNotifyRecursive()
+{
+	changeNotify();
+
+	foreach(Task *subtask, subtasks())
+		subtask->changeNotifyRecursive();
 }

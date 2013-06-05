@@ -43,7 +43,12 @@ class TaskModel : public QAbstractItemModel
 		TaskFactory *taskFactory() const;
 		void setTaskFactory(TaskFactory *factory);
 
+	public slots:
+		void taskChanged(const QList<int> &path);
+
 	private:
+		QModelIndex pathToIndex(const QList<int> &path) const;
+
 		Task *getTask(const QModelIndex &index) const;
 
 		Task *_root;
