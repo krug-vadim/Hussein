@@ -26,11 +26,6 @@ TaskTreeView::TaskTreeView(QWidget *parent)
 	        this, &TaskTreeView::taskExpanded);
 }
 
-void TaskTreeView::setModel(QAbstractItemModel *model)
-{
-	QTreeView::setModel(model);
-}
-
 void TaskTreeView::keyPressEvent(QKeyEvent *event)
 {
 	switch ( event->key() )

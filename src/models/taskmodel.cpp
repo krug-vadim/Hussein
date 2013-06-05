@@ -12,6 +12,7 @@ TaskModel::TaskModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
 	_root = 0;
+
 }
 
 TaskModel::~TaskModel()
@@ -76,6 +77,11 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 		case Qt::DisplayRole:
 			if ( index.column() == 0 )
 				return ( task->description().isEmpty() ) ? tr("(empty)") : task->description();
+			break;
+
+		case Qt::EditRole:
+			if ( index.column() == 0 )
+				return task->description();
 			break;
 
 		case Qt::ForegroundRole:
@@ -148,7 +154,13 @@ int TaskModel::columnCount(const QModelIndex &parent) const
 bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 	bool result;
-	BasicTask *task = getTask(index);
+	QModelIndex nextIndex;
+	BasicTask *task;
+
+	nextIndex = index;
+	task = getTask(index);
+
+	qDebug() << "setData" << index << nextIndex;
 
 	if ( !task )
 		return false;
@@ -163,6 +175,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 		case TaskDoneRole:
 			task->setDone(value.toBool());
+			nextIndex = this->index(index.row() + 1, index.column(), index.parent());
 			result = true;
 			break;
 
@@ -181,8 +194,10 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 			break;
 	}
 
+	qDebug() << "setData" << index << nextIndex;
+
 	if ( result )
-		emit dataChanged(index, index);
+		emit dataChanged(index, nextIndex);
 
 	return result;
 }
@@ -272,6 +287,17 @@ TaskFactory *TaskModel::taskFactory() const
 void TaskModel::setTaskFactory(TaskFactory *factory)
 {
 	_taskFactory = factory;
+}
+
+void TaskModel::rootAboutToBeChanged()
+{
+	emit layoutAboutToBeChanged();
+}
+
+void TaskModel::rootChanged()
+{
+	//changePersistentIndex()
+	emit layoutChanged();
 }
 
 BasicTask *TaskModel::getTask(const QModelIndex &index) const

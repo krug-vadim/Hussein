@@ -11,7 +11,8 @@ SOURCES += \
     src/ui/tasktreewidget.cpp \
     src/ui/tasktreeview.cpp \
     src/limbs/taskfactory.cpp \
-    src/serialization/jsonserialization.cpp
+    src/serialization/jsonserialization.cpp \
+    src/models/tasksortfilterproxymodel.cpp
 
 HEADERS  += \
     src/limbs/basictask.h \
@@ -20,7 +21,8 @@ HEADERS  += \
     src/ui/tasktreewidget.h \
     src/ui/tasktreeview.h \
     src/limbs/taskfactory.h \
-    src/serialization/jsonserialization.h
+    src/serialization/jsonserialization.h \
+    src/models/tasksortfilterproxymodel.h
 
 FORMS    += \
     src/ui/mainwindow.ui \

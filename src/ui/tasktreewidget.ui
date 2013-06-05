@@ -27,9 +27,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="showDone">
        <property name="text">
-        <string>CheckBox</string>
+        <string>done</string>
        </property>
       </widget>
      </item>
@@ -50,7 +50,7 @@
  <tabstops>
   <tabstop>tasksView</tabstop>
   <tabstop>lineEdit</tabstop>
-  <tabstop>checkBox</tabstop>
+  <tabstop>showDone</tabstop>
  </tabstops>
  <resources/>
  <connections/>

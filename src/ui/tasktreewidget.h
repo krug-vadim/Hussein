@@ -5,6 +5,7 @@
 
 class BasicTask;
 class TaskModel;
+class TaskSortFilterProxyModel;
 
 namespace Ui
 {
@@ -28,9 +29,13 @@ class TaskTreeWidget : public QWidget
 		bool open();
 		bool save();
 
+		void showDoneChanged(int state);
+
 	private:
-		TaskModel *_taskModel;
 		BasicTask *_rootTask;
+
+		TaskModel *_taskModel;
+		TaskSortFilterProxyModel *_taskProxyModel;
 
 		QString _fileName;
 

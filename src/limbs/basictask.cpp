@@ -89,8 +89,8 @@ bool BasicTask::appendSubtask(BasicTask *task)
 		return false;
 
 	task->setParent(this);
-
 	_subtasks.append(task);
+
 	return true;
 }
 
@@ -103,7 +103,6 @@ bool BasicTask::insertSubtask(BasicTask *task, int position)
 		return false;
 
 	task->setParent(this);
-
 	_subtasks.insert(position, task);
 
 	return true;
@@ -127,7 +126,3 @@ int BasicTask::row() const
 
 	return parent()->subtasks().indexOf( const_cast<BasicTask *>(this) );
 }
-
-
-
-

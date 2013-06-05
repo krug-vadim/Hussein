@@ -36,7 +36,7 @@ class BasicTask : public QObject
 		bool insertSubtask(BasicTask *task, int position);
 		bool removeSubtask(int position);
 
-		virtual int row() const;
+		int row() const;
 
 	private:
 		BasicTask *_parent;

@@ -4,6 +4,7 @@
 #include "../limbs/basictask.h"
 #include "../limbs/taskfactory.h"
 #include "../models/taskmodel.h"
+#include "../models/tasksortfilterproxymodel.h"
 
 #include "../serialization/jsonserialization.h"
 
@@ -22,7 +23,16 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_taskModel->setRoot(_rootTask);
 	_taskModel->setTaskFactory(new TaskFactory(this));
 
-	ui->tasksView->setModel(_taskModel);
+	_taskProxyModel = new TaskSortFilterProxyModel(this);
+	_taskProxyModel->setSourceModel(_taskModel);
+	_taskProxyModel->setDynamicSortFilter(true);
+
+	ui->showDone->setChecked(_taskProxyModel->showDone());
+	connect(ui->showDone, &QCheckBox::stateChanged,
+	        this, &TaskTreeWidget::showDoneChanged);
+
+	ui->tasksView->setModel(_taskProxyModel);
+
 
 	ui->tasksView->setFocus();
 }
@@ -53,7 +63,10 @@ bool TaskTreeWidget::open()
 
 	if ( !fileName().isEmpty() )
 	{
+		_taskModel->rootAboutToBeChanged();
 		bool result = JsonSerialization::deserialize(fileName(), _rootTask);
+		_taskModel->rootChanged();
+
 		ui->tasksView->expandTasks();
 		return result;
 	}
@@ -67,4 +80,14 @@ bool TaskTreeWidget::save()
 		return JsonSerialization::serialize(fileName(), _rootTask);
 	else
 		return false;
+}
+
+void TaskTreeWidget::showDoneChanged(int state)
+{
+	if ( state == Qt::Checked )
+		_taskProxyModel->setShowDone(true);
+	else
+		_taskProxyModel->setShowDone(false);
+
+	ui->tasksView->expandTasks();
 }
