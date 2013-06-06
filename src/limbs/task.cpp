@@ -20,16 +20,16 @@ void Task::setParent(Task *parent)
 {
 	if ( _parent )
 	{
-		disconnect(this, SIGNAL(changed(QList<int>)),
-		           _parent, SIGNAL(changed(QList<int>)));
+		disconnect(this, SIGNAL(dataChanged(QList<int>)),
+		           _parent, SIGNAL(dataChanged(QList<int>)));
 	}
 
 	_parent = parent;
 
 	if ( _parent )
 	{
-		connect(this, SIGNAL(changed(QList<int>)),
-		        _parent, SIGNAL(changed(QList<int>)));
+		connect(this, SIGNAL(dataChanged(QList<int>)),
+		        _parent, SIGNAL(dataChanged(QList<int>)));
 	}
 }
 
@@ -41,6 +41,7 @@ const QString &Task::description() const
 void Task::setDescription(const QString &description)
 {
 	_description = description;
+	changeNotify();
 }
 
 bool Task::isDone() const
@@ -151,7 +152,7 @@ void Task::changeNotify()
 
 	getPath(path);
 
-	emit changed(path);
+	emit dataChanged(path);
 }
 
 void Task::changeNotifyRecursive()

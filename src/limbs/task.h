@@ -39,7 +39,7 @@ class Task : public QObject
 		int row() const;
 
 	signals:
-		void changed(const QList<int> &path);
+		void dataChanged(const QList<int> &path);
 
 	private:
 		void changeNotify();

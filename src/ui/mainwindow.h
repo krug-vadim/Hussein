@@ -16,6 +16,9 @@ class MainWindow : public QMainWindow
 		explicit MainWindow(QWidget *parent = 0);
 		~MainWindow();
 
+	public slots:
+		void status(const QString &message);
+
 	private slots:
 		void newFile();
 		void openFile();
@@ -23,7 +26,7 @@ class MainWindow : public QMainWindow
 		void saveAsFile();
 
 		//
-		void status(const QString &message);
+		//void placeToTray();
 
 	private:
 		static const int DEFAULT_STATUS_TIME = 3000;

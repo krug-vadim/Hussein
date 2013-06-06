@@ -19,8 +19,23 @@ bool TaskSortFilterProxyModel::moveRows(const QModelIndex &sourceParent, int sou
 {
 	if ( !sourceModel() )
 		return false;
-	else
-		return sourceModel()->moveRows(sourceParent, sourceRow, count, destinationParent, destinationChild);
+
+	QModelIndex realSourceParent = mapToSource(sourceParent);
+	//int realSourceRow = mapToSource(index(sourceRow, 0, sourceParent)).row();
+	QModelIndex realDestinationParent = mapToSource(destinationParent);
+	int realDestinationChild = mapToSource(index(destinationChild, 0, destinationParent)).row();
+
+	bool ok = true;
+
+	for(int i = 0; i < count; i++)
+	{
+		int childRow = sourceRow + i;
+		int realSourceRow = mapToSource(index(childRow, 0, sourceParent)).row();
+
+		ok = ok && sourceModel()->moveRows(realSourceParent, realSourceRow, 1, realDestinationParent, realDestinationChild);
+	}
+
+	return ok;
 }
 
 void TaskSortFilterProxyModel::setShowDone(const bool show)

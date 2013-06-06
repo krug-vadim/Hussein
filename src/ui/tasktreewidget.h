@@ -23,16 +23,37 @@ class TaskTreeWidget : public QWidget
 		Task *root() const;
 
 		QString fileName() const;
-		void setFileName(const QString &fileName);
+
+		bool isModified() const;
+
+	signals:
+		void fileNameChanged(const QString &fileName);
+		void taskListModified();
+
+		void message(const QString &text);
 
 	public slots:
-		bool open();
-		bool save();
+		bool open(const QString &fileName = QString());
+		bool save(const QString &fileName = QString());
 
 		void showDoneChanged(int state);
 
+	protected:
+		void closeEvent(QCloseEvent *event);
+
+	private slots:
+		bool openTaskList(const QString &fileName = QString());
+		bool saveTaskList(const QString &fileName = QString());
+
 	private:
+		void setFileName(const QString &fileName);
+		void setModified(const bool modified);
+
+		bool maybeSave();
+
 		Task *_rootTask;
+
+		bool _modified;
 
 		TaskModel *_taskModel;
 		TaskSortFilterProxyModel *_taskProxyModel;

@@ -43,15 +43,9 @@ void MainWindow::openFile()
 	foreach(const QString &fileName, fileNames)
 	{
 		QFileInfo fileInfo(fileName);
+
 		TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
-
-		taskTreeWidget->setFileName(fileName);
-
-		if ( taskTreeWidget->open() )
-			status(tr("Opened %1.").arg(fileName));
-		else
-			status(tr("Failed to open %1.").arg(fileName));
-
+		taskTreeWidget->open(fileName);
 		ui->tabWidget->addTab(taskTreeWidget, fileInfo.baseName());
 	}
 }
@@ -63,23 +57,7 @@ void MainWindow::saveFile()
 	if ( !taskTreeWidget )
 		return;
 
-	if ( taskTreeWidget->fileName().isEmpty() )
-	{
-		QString fileName = QFileDialog::getSaveFileName(this,
-		                                                tr("Save tasklist"),
-		                                                QString(),
-		                                                tr("Tasklist (*.json)"));
-
-		if ( fileName.isEmpty() )
-			return;
-
-		taskTreeWidget->setFileName(fileName);
-	}
-
-	if ( taskTreeWidget->save() )
-		status(tr("Saved %1.").arg(taskTreeWidget->fileName()));
-	else
-		status(tr("Failed to save %1.").arg(taskTreeWidget->fileName()));
+	taskTreeWidget->save();
 }
 
 void MainWindow::saveAsFile()
@@ -97,12 +75,7 @@ void MainWindow::saveAsFile()
 	if ( fileName.isEmpty() )
 		return;
 
-	taskTreeWidget->setFileName(fileName);
-
-	if ( taskTreeWidget->save() )
-		status(tr("Saved %1.").arg(taskTreeWidget->fileName()));
-	else
-		status(tr("Failed to save %1.").arg(taskTreeWidget->fileName()));
+	taskTreeWidget->save(fileName);
 }
 
 void MainWindow::status(const QString &message)

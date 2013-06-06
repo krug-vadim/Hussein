@@ -285,25 +285,27 @@ void TaskModel::setTaskFactory(TaskFactory *factory)
 	_taskFactory = factory;
 }
 
-void TaskModel::aboutUpdateModel()
+void TaskModel::tasksAboutToBeReseted()
 {
-	emit layoutAboutToBeChanged();
+	emit beginResetModel();
 }
 
-void TaskModel::updateModel()
+void TaskModel::tasksReseted()
 {
-	emit layoutChanged();
+	emit endResetModel();
 }
 
-void TaskModel::taskChanged(const QList<int> &path)
+void TaskModel::taskDataChanged(const QList<int> &path)
 {
 	QModelIndex index = pathToIndex(path);
-	qDebug() << "taskChanged" << path << index;
 	emit dataChanged(index, index);
 }
 
 QModelIndex TaskModel::pathToIndex(const QList<int> &path) const
 {
+	if ( path.isEmpty() )
+		return QModelIndex();
+
 	QModelIndex index = this->index(path.last(), 0);
 
 	for(int i = path.size() - 1; i > 0; i--)

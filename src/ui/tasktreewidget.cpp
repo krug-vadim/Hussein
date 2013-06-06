@@ -1,6 +1,11 @@
 #include "tasktreewidget.h"
 #include "ui_tasktreewidget.h"
 
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QFileDialog>
+
+#include <QtGui/QCloseEvent>
+
 #include "../limbs/task.h"
 #include "../limbs/taskfactory.h"
 #include "../models/taskmodel.h"
@@ -12,10 +17,15 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TaskTreeWidget)
 {
+	_modified = false;
+
 	ui->setupUi(this);
 
 	_rootTask = new Task(0);
 	_rootTask->setDescription(tr("(root)"));
+
+	/*connect(_rootTask, SIGNAL(changed(QList<int>)),
+	        this, SIGNAL(taskListModified()));*/
 
 	_fileName = QString();
 
@@ -23,8 +33,8 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_taskModel->setRoot(_rootTask);
 	_taskModel->setTaskFactory(new TaskFactory(this));
 
-	connect(_rootTask, SIGNAL(changed(QList<int>)),
-	        _taskModel, SLOT(taskChanged(QList<int>)));
+	connect(_rootTask, SIGNAL(dataChanged(QList<int>)),
+	        _taskModel, SLOT(taskDataChanged(QList<int>)));
 
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);
@@ -36,7 +46,6 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 
 	ui->tasksView->setModel(_taskProxyModel);
 	//ui->tasksView->setModel(_taskModel);
-
 
 	ui->tasksView->setFocus();
 }
@@ -56,34 +65,19 @@ QString TaskTreeWidget::fileName() const
 	return _fileName;
 }
 
+bool TaskTreeWidget::isModified() const
+{
+	return _modified;
+}
+
 void TaskTreeWidget::setFileName(const QString &fileName)
 {
 	_fileName = fileName;
 }
 
-bool TaskTreeWidget::open()
+void TaskTreeWidget::setModified(const bool modified)
 {
-	_rootTask->clear();
-
-	if ( !fileName().isEmpty() )
-	{
-		_taskModel->aboutUpdateModel();
-		bool result = JsonSerialization::deserialize(fileName(), _rootTask);
-		_taskModel->updateModel();
-
-		ui->tasksView->expandTasks();
-		return result;
-	}
-	else
-		return false;
-}
-
-bool TaskTreeWidget::save()
-{
-	if ( !fileName().isEmpty() )
-		return JsonSerialization::serialize(fileName(), _rootTask);
-	else
-		return false;
+	_modified = modified;
 }
 
 void TaskTreeWidget::showDoneChanged(int state)
@@ -94,4 +88,123 @@ void TaskTreeWidget::showDoneChanged(int state)
 		_taskProxyModel->setShowDone(false);
 
 	ui->tasksView->expandTasks();
+}
+
+void TaskTreeWidget::closeEvent(QCloseEvent *event)
+{
+	if ( maybeSave() )
+	{
+		event->accept();
+	}
+	else
+		event->ignore();
+}
+
+bool TaskTreeWidget::maybeSave()
+{
+	if ( !isModified() )
+		return true;
+
+	QMessageBox::StandardButton ret;
+
+	ret = QMessageBox::warning(this,
+	                           tr("Tasklist have been modified"),
+	                           tr("Do you want to save changes?"),
+	                           QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel);
+
+	switch ( ret )
+	{
+		case QMessageBox::Save:
+			return save();
+			break;
+
+		case QMessageBox::Cancel:
+			return false;
+			break;
+
+		default:
+			return true;
+			break;
+	}
+}
+
+bool TaskTreeWidget::open(const QString &fileName)
+{
+	QString openFileName;
+
+	openFileName = (fileName.isEmpty()) ? this->fileName() : fileName;
+
+	if ( openFileName.isEmpty() )
+	{
+		openFileName = QFileDialog::getOpenFileName(this,
+		                                            tr("Open tasklist..."),
+		                                            QString(),
+		                                            tr("Tasklist (*.json);;Any (*.*)"));
+	}
+
+	_taskModel->tasksAboutToBeReseted();
+	if ( openTaskList(openFileName) )
+	{
+		setFileName(openFileName);
+		setModified(false);
+		_taskModel->tasksReseted();
+		ui->tasksView->expandTasks();
+		emit message(tr("Opened %1.").arg(openFileName));
+
+		return true;
+	}
+	else
+	{
+		_taskModel->tasksReseted();
+		emit message(tr("Failed to open %1.").arg(openFileName));
+		return false;
+	}
+}
+
+bool TaskTreeWidget::save(const QString &fileName)
+{
+	QString saveFileName;
+
+	saveFileName = (fileName.isEmpty()) ? this->fileName() : fileName;
+
+	if ( saveFileName.isEmpty() )
+	{
+		saveFileName = QFileDialog::getSaveFileName(this,
+		                                            tr("Save tasklist"),
+		                                            QString(),
+		                                            tr("Tasklist (*.json)"));
+	}
+
+	if ( saveTaskList(saveFileName) )
+	{
+		setFileName(saveFileName);
+		setModified(false);
+		emit message(tr("Saved %1.").arg(saveFileName));
+
+		return true;
+	}
+	else
+	{
+		emit message(tr("Failed to save %1.").arg(saveFileName));
+
+		return false;
+	}
+}
+
+bool TaskTreeWidget::openTaskList(const QString &fileName)
+{
+	_rootTask->clear();
+
+	if ( !fileName.isEmpty() )
+		return JsonSerialization::deserialize(fileName, _rootTask);
+	else
+		return false;
+}
+
+bool TaskTreeWidget::saveTaskList(const QString &fileName)
+{
+	if ( !fileName.isEmpty() )
+		return JsonSerialization::serialize(fileName, _rootTask);
+	else
+		return false;
 }
