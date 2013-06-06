@@ -5,13 +5,25 @@
 
 #include <QtWidgets/QFileDialog>
 
+#include <QtCore/QSignalMapper>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
 
+	_tabsWidgetModifyMapper = new QSignalMapper(this);
+	connect(_tabsWidgetModifyMapper, SIGNAL(mapped(int)),
+	        this, SLOT(taskListModified(int)));
+
+	_tabsWidgetFileNameChangeMapper = new QSignalMapper(this);
+	connect(_tabsWidgetFileNameChangeMapper, SIGNAL(mapped(int)),
+	        this, SLOT(taskListFileNameChanged(int)));
+
 	setupActions();
+
+
 
 	//setCentralWidget( new TaskTreeWidget(_rootTask, this) );
 }
@@ -23,12 +35,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::newFile()
 {
-	QString taskList = tr("Tasklist %1").arg(ui->tabWidget->count() + 1);
+	QString taskListName = tr("Tasklist %1").arg(ui->tabWidget->count() + 1);
 
-	int index = ui->tabWidget->addTab(new TaskTreeWidget(this), taskList);
-	ui->tabWidget->setCurrentIndex(index);
+	createNewTaskTreeWidget(taskListName);
 
-	status(tr("Created %1.").arg(taskList));
+	status(tr("Created %1.").arg(taskListName));
 }
 
 void MainWindow::openFile()
@@ -41,14 +52,17 @@ void MainWindow::openFile()
 	if ( fileNames.empty() )
 		return;
 
+	int index;
+
 	foreach(const QString &fileName, fileNames)
 	{
 		QFileInfo fileInfo(fileName);
 
-		TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
+		TaskTreeWidget *taskTreeWidget = createNewTaskTreeWidget(fileInfo.baseName());
 		taskTreeWidget->open(fileName);
-		ui->tabWidget->addTab(taskTreeWidget, fileInfo.baseName());
 	}
+
+	//ui->tabWidget->setCurrentIndex();
 }
 
 void MainWindow::saveFile()
@@ -79,6 +93,35 @@ void MainWindow::saveAsFile()
 	taskTreeWidget->save(fileName);
 }
 
+void MainWindow::taskListModified(int index)
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
+
+	if ( !taskTreeWidget )
+		return;
+
+	QString newTabTitle = _indexToTitle.value(index);
+
+	if ( taskTreeWidget->isModified() )
+		newTabTitle += "*";
+
+	ui->tabWidget->setTabText(index, newTabTitle);
+}
+
+void MainWindow::taskListFileNameChanged(int index)
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
+
+	if ( !taskTreeWidget )
+		return;
+
+	QFileInfo fileInfo;
+
+	fileInfo.setFile(taskTreeWidget->fileName());
+
+	_indexToTitle[index] = fileInfo.baseName();
+}
+
 void MainWindow::status(const QString &message)
 {
 	ui->statusbar->showMessage(message, DEFAULT_STATUS_TIME);
@@ -100,4 +143,21 @@ void MainWindow::setupActions()
 
 	connect(ui->actionQuit, &QAction::triggered,
 	        this, &MainWindow::close);
+}
+
+TaskTreeWidget * MainWindow::createNewTaskTreeWidget(const QString &title)
+{
+	TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
+
+	int index = ui->tabWidget->addTab(taskTreeWidget, title);
+	ui->tabWidget->setCurrentIndex(index);
+
+	_indexToTitle[index] = title;
+	_tabsWidgetModifyMapper->setMapping(taskTreeWidget, index);
+	connect(taskTreeWidget, SIGNAL(taskListModified()),
+	        _tabsWidgetModifyMapper, SLOT(map()));
+	connect(taskTreeWidget, SIGNAL(fileNameChanged(QString)),
+	        _tabsWidgetFileNameChangeMapper, SLOT(map()));
+
+	return taskTreeWidget;
 }

@@ -45,6 +45,8 @@ class TaskTreeWidget : public QWidget
 		bool openTaskList(const QString &fileName = QString());
 		bool saveTaskList(const QString &fileName = QString());
 
+		void modifyTaskList();
+
 	private:
 		void setFileName(const QString &fileName);
 		void setModified(const bool modified);

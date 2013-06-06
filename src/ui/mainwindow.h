@@ -3,6 +3,9 @@
 
 #include <QtWidgets/QMainWindow>
 
+class QSignalMapper;
+class TaskTreeWidget;
+
 namespace Ui
 {
 	class MainWindow;
@@ -25,6 +28,9 @@ class MainWindow : public QMainWindow
 		void saveFile();
 		void saveAsFile();
 
+		void taskListModified(int index);
+		void taskListFileNameChanged(int index);
+
 		//
 		//void placeToTray();
 
@@ -32,6 +38,13 @@ class MainWindow : public QMainWindow
 		static const int DEFAULT_STATUS_TIME = 3000;
 
 		void setupActions();
+
+		TaskTreeWidget *createNewTaskTreeWidget(const QString &title);
+
+		QSignalMapper *_tabsWidgetModifyMapper;
+		QSignalMapper *_tabsWidgetFileNameChangeMapper;
+
+		QHash<int, QString> _indexToTitle;
 
 		Ui::MainWindow *ui;
 };

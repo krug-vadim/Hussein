@@ -36,6 +36,17 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	connect(_rootTask, SIGNAL(dataChanged(QList<int>)),
 	        _taskModel, SLOT(taskDataChanged(QList<int>)));
 
+	connect(_taskModel, SIGNAL(layoutChanged()),
+	        this, SLOT(modifyTaskList()));
+	connect(_taskModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+	        this, SLOT(modifyTaskList()));
+	connect(_taskModel, SIGNAL(rowsInserted(QModelIndex,int,int)),
+	        this, SLOT(modifyTaskList()));
+	connect(_taskModel, SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
+	        this, SLOT(modifyTaskList()));
+	connect(_taskModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+	        this, SLOT(modifyTaskList()));
+
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);
 	_taskProxyModel->setDynamicSortFilter(true);
@@ -78,6 +89,8 @@ void TaskTreeWidget::setFileName(const QString &fileName)
 void TaskTreeWidget::setModified(const bool modified)
 {
 	_modified = modified;
+
+	emit taskListModified();
 }
 
 void TaskTreeWidget::showDoneChanged(int state)
@@ -146,9 +159,9 @@ bool TaskTreeWidget::open(const QString &fileName)
 	if ( openTaskList(openFileName) )
 	{
 		setFileName(openFileName);
-		setModified(false);
 		_taskModel->tasksReseted();
 		ui->tasksView->expandTasks();
+		setModified(false);
 		emit message(tr("Opened %1.").arg(openFileName));
 
 		return true;
@@ -207,4 +220,9 @@ bool TaskTreeWidget::saveTaskList(const QString &fileName)
 		return JsonSerialization::serialize(fileName, _rootTask);
 	else
 		return false;
+}
+
+void TaskTreeWidget::modifyTaskList()
+{
+	setModified(true);
 }
