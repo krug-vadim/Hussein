@@ -160,9 +160,6 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 	task = getTask(index);
 
-	qDebug() << "rowCount" << rowCount(index);
-	qDebug() << "setData" << index << nextIndex;
-
 	if ( !task )
 		return false;
 
@@ -194,8 +191,6 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 			result = false;
 			break;
 	}
-
-	qDebug() << "setData" << index << nextIndex;
 
 	if ( result )
 		emit dataChanged(index, nextIndex);
@@ -302,18 +297,17 @@ void TaskModel::updateModel()
 
 void TaskModel::taskChanged(const QList<int> &path)
 {
-	qDebug() << "taskChanged" << path;
 	QModelIndex index = pathToIndex(path);
+	qDebug() << "taskChanged" << path << index;
 	emit dataChanged(index, index);
 }
 
 QModelIndex TaskModel::pathToIndex(const QList<int> &path) const
 {
-	QModelIndex index = QModelIndex();
+	QModelIndex index = this->index(path.last(), 0);
 
-	while(!path.empty())
-	//foreach(int row, path)
-		index = index.child(path.takeLast(), 0);
+	for(int i = path.size() - 1; i > 0; i--)
+		index = index.child(path.at(i-1), 0);
 
 	return index;
 }

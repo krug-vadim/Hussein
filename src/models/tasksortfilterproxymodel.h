@@ -12,6 +12,8 @@ class TaskSortFilterProxyModel : public QSortFilterProxyModel
 
 		bool showDone() const;
 
+		bool moveRows(const QModelIndex & sourceParent, int sourceRow, int count, const QModelIndex & destinationParent, int destinationChild);
+
 	public slots:
 		void setShowDone(const bool show);
 

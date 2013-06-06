@@ -102,13 +102,11 @@ void TaskTreeView::paintEvent(QPaintEvent *event)
 
 void TaskTreeView::taskCollapsed(const QModelIndex &index)
 {
-	qDebug() << "collapsed" << index;
 	model()->setData(index, false, TaskModel::TaskExpandedRole);
 }
 
 void TaskTreeView::taskExpanded(const QModelIndex &index)
 {
-	qDebug() << "expanded" << index;
 	model()->setData(index, true, TaskModel::TaskExpandedRole);
 }
 
@@ -116,17 +114,12 @@ void TaskTreeView::expandTasks()
 {
 	QModelIndexList indexes;
 
-	qDebug() << "expandTasks" << model()->rowCount();
 	for(int i = 0;i < model()->rowCount(); i++)
-	{
-		qDebug() << "expanding" << model()->index(i, 0) << model()->data(model()->index(i, 0));
 		expandTask(model()->index(i, 0));
-	}
 }
 
 void TaskTreeView::expandTask(const QModelIndex &index)
 {
-	qDebug() << "expandTask" << index << model()->data(index);
 	setExpanded(index, model()->data(index, TaskModel::TaskExpandedRole).toBool());
 
 	for(int i = 0; i < model()->rowCount(index); i++)
