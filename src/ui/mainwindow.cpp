@@ -25,7 +25,8 @@ void MainWindow::newFile()
 {
 	QString taskList = tr("Tasklist %1").arg(ui->tabWidget->count() + 1);
 
-	ui->tabWidget->addTab(new TaskTreeWidget(this), taskList);
+	int index = ui->tabWidget->addTab(new TaskTreeWidget(this), taskList);
+	ui->tabWidget->setCurrentIndex(index);
 
 	status(tr("Created %1.").arg(taskList));
 }

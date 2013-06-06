@@ -23,7 +23,10 @@ bool TaskSortFilterProxyModel::moveRows(const QModelIndex &sourceParent, int sou
 	QModelIndex realSourceParent = mapToSource(sourceParent);
 	//int realSourceRow = mapToSource(index(sourceRow, 0, sourceParent)).row();
 	QModelIndex realDestinationParent = mapToSource(destinationParent);
-	int realDestinationChild = mapToSource(index(destinationChild, 0, destinationParent)).row();
+
+	QModelIndex realDestination = mapToSource(index(destinationChild, 0, destinationParent));
+	int realDestinationChild = (realDestination.isValid()) ? realDestination.row()
+	                                                       : sourceModel()->rowCount(realDestinationParent);
 
 	bool ok = true;
 
@@ -31,6 +34,7 @@ bool TaskSortFilterProxyModel::moveRows(const QModelIndex &sourceParent, int sou
 	{
 		int childRow = sourceRow + i;
 		int realSourceRow = mapToSource(index(childRow, 0, sourceParent)).row();
+		//sourceChildsToMove << mapToSource(index(childRow, 0, sourceParent));
 
 		ok = ok && sourceModel()->moveRows(realSourceParent, realSourceRow, 1, realDestinationParent, realDestinationChild);
 	}

@@ -83,7 +83,7 @@ void Task::setExpanded(const bool expanded)
 void Task::clear()
 {
 	_done = false;
-	_expanded = false;
+	_expanded = true;
 
 	qDeleteAll(_subtasks);
 	_subtasks.clear();

@@ -20,6 +20,8 @@ TaskTreeView::TaskTreeView(QWidget *parent)
 	setAllColumnsShowFocus(true);
 	setHeaderHidden(false);
 
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+
 	connect(this, &TaskTreeView::collapsed,
 	        this, &TaskTreeView::taskCollapsed);
 	connect(this, &TaskTreeView::expanded,
@@ -112,8 +114,6 @@ void TaskTreeView::taskExpanded(const QModelIndex &index)
 
 void TaskTreeView::expandTasks()
 {
-	QModelIndexList indexes;
-
 	for(int i = 0;i < model()->rowCount(); i++)
 		expandTask(model()->index(i, 0));
 }
@@ -196,12 +196,13 @@ void TaskTreeView::changeCurrentToSubtask()
 	if ( !prev.isValid() )
 		return;
 
+	expand(prev);
+
 	if ( !model()->moveRows(index.parent(), index.row(), 1, prev, model()->rowCount(prev)) )
 		return;
 
-	selectionModel()->setCurrentIndex(model()->index(model()->rowCount(prev) - 1, 0, prev), QItemSelectionModel::ClearAndSelect);
-
-	expand(prev);
+	/*prev = model()->index(index.row() - 1, index.column(), index.parent());
+	selectionModel()->setCurrentIndex(model()->index(model()->rowCount(prev) - 1, 0, prev), QItemSelectionModel::ClearAndSelect);*/
 }
 
 void TaskTreeView::changeCurrentToTask()
