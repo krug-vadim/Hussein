@@ -210,7 +210,8 @@ bool TaskTreeWidget::openTaskList(const QString &fileName)
 	_rootTask->clear();
 
 	if ( !fileName.isEmpty() )
-		return JsonSerialization::deserialize(fileName, _rootTask);
+		return YamlSerialization::deserialize(fileName, _rootTask);
+		//return JsonSerialization::deserialize(fileName, _rootTask);
 	else
 		return false;
 }
@@ -218,8 +219,8 @@ bool TaskTreeWidget::openTaskList(const QString &fileName)
 bool TaskTreeWidget::saveTaskList(const QString &fileName)
 {
 	if ( !fileName.isEmpty() )
-		//return JsonSerialization::serialize(fileName, _rootTask);
 		return YamlSerialization::serialize(fileName, _rootTask);
+		//return JsonSerialization::serialize(fileName, _rootTask);
 	else
 		return false;
 }

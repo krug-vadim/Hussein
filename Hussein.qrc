@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>hussein.ico</file>
+        <file>Hussein.ico</file>
         <file>pix/branch-closed.png</file>
         <file>pix/branch-end.png</file>
         <file>pix/branch-more.png</file>
