@@ -12,6 +12,7 @@
 #include "../models/tasksortfilterproxymodel.h"
 
 #include "../serialization/jsonserialization.h"
+#include "../serialization/yamlserialization.h"
 
 TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
     QWidget(parent),
@@ -217,7 +218,8 @@ bool TaskTreeWidget::openTaskList(const QString &fileName)
 bool TaskTreeWidget::saveTaskList(const QString &fileName)
 {
 	if ( !fileName.isEmpty() )
-		return JsonSerialization::serialize(fileName, _rootTask);
+		//return JsonSerialization::serialize(fileName, _rootTask);
+		return YamlSerialization::serialize(fileName, _rootTask);
 	else
 		return false;
 }

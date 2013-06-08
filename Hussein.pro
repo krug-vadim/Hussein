@@ -12,7 +12,8 @@ SOURCES += \
     src/limbs/taskfactory.cpp \
     src/serialization/jsonserialization.cpp \
     src/models/tasksortfilterproxymodel.cpp \
-    src/limbs/task.cpp
+    src/limbs/task.cpp \
+    src/serialization/yamlserialization.cpp
 
 HEADERS  += \
     src/models/taskmodel.h \
@@ -22,7 +23,8 @@ HEADERS  += \
     src/limbs/taskfactory.h \
     src/serialization/jsonserialization.h \
     src/models/tasksortfilterproxymodel.h \
-    src/limbs/task.h
+    src/limbs/task.h \
+    src/serialization/yamlserialization.h
 
 FORMS    += \
     src/ui/mainwindow.ui \
@@ -35,4 +37,19 @@ OTHER_FILES += \
 RESOURCES += \
     Hussein.qrc
 
-win32:RC_FILE += Hussein.rc
+win32 {
+    RC_FILE += Hussein.rc
+    INCLUDEPATH += "lib/yaml-cpp/include"
+    INCLUDEPATH += "lib/boost/"
+}
+
+CONFIG(debug, debug|release) {
+    win32:LIBS += "-L$$PWD/lib/yaml-cpp/build/debug/"
+    win32:LIBS += "-lyamld"
+    unix:LIBS += -lyaml-cpp
+} else {
+    #win32:LIBS += -lyaml
+    win32:LIBS += "-L$$PWD/lib/yaml-cpp/build/release/"
+    win32:LIBS += "-lyaml"
+    unix:LIBS += -lyaml-cpp
+}
