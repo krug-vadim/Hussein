@@ -43,7 +43,10 @@ TaskTreeWidget * MainWindow::createNewTaskTreeWidget(const QString &title)
 	ui->tabWidget->setCurrentIndex(index);
 
 	_indexToTitle[index] = title;
+
 	_tabsWidgetModifyMapper->setMapping(taskTreeWidget, index);
+	_tabsWidgetFileNameChangeMapper->setMapping(taskTreeWidget, index);
+
 	connect(taskTreeWidget, SIGNAL(taskListModified()),
 	        _tabsWidgetModifyMapper, SLOT(map()));
 	connect(taskTreeWidget, SIGNAL(fileNameChanged(QString)),
@@ -217,6 +220,7 @@ void MainWindow::taskListFileNameChanged(int index)
 	fileInfo.setFile(taskTreeWidget->fileName());
 
 	_indexToTitle[index] = fileInfo.baseName();
+	taskListModified(index);
 }
 
 void MainWindow::status(const QString &message)

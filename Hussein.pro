@@ -13,7 +13,8 @@ SOURCES += \
     src/serialization/jsonserialization.cpp \
     src/models/tasksortfilterproxymodel.cpp \
     src/limbs/task.cpp \
-    src/serialization/yamlserialization.cpp
+    src/serialization/yamlserialization.cpp \
+    src/ui/tasktabwidget.cpp
 
 HEADERS  += \
     src/models/taskmodel.h \
@@ -24,7 +25,8 @@ HEADERS  += \
     src/serialization/jsonserialization.h \
     src/models/tasksortfilterproxymodel.h \
     src/limbs/task.h \
-    src/serialization/yamlserialization.h
+    src/serialization/yamlserialization.h \
+    src/ui/tasktabwidget.h
 
 FORMS    += \
     src/ui/mainwindow.ui \

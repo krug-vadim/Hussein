@@ -80,6 +80,7 @@ bool TaskTreeWidget::isModified() const
 void TaskTreeWidget::setFileName(const QString &fileName)
 {
 	_fileName = fileName;
+	emit fileNameChanged(fileName);
 }
 
 void TaskTreeWidget::setModified(const bool modified)
@@ -97,6 +98,12 @@ void TaskTreeWidget::showDoneChanged(int state)
 		_taskProxyModel->setShowDone(false);
 
 	ui->tasksView->expandTasks();
+}
+
+void TaskTreeWidget::showEvent(QShowEvent * event)
+{
+	ui->tasksView->setFocus();
+	QWidget::showEvent(event);
 }
 
 bool TaskTreeWidget::open(const QString &fileName)

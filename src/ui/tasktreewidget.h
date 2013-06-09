@@ -38,6 +38,9 @@ class TaskTreeWidget : public QWidget
 
 		void showDoneChanged(int state);
 
+	protected:
+		void showEvent(QShowEvent * event);
+
 	private slots:
 		void modifyTaskList();
 
