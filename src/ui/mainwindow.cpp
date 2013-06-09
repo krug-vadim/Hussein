@@ -4,7 +4,9 @@
 #include "tasktreewidget.h"
 
 #include <QtCore/QSignalMapper>
+
 #include <QtGui/QCloseEvent>
+
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 

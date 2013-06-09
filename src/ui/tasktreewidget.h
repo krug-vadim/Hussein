@@ -7,6 +7,8 @@ class Task;
 class TaskModel;
 class TaskSortFilterProxyModel;
 
+class QFileSystemWatcher;
+
 namespace Ui
 {
 	class TaskTreeWidget;
@@ -43,6 +45,7 @@ class TaskTreeWidget : public QWidget
 
 	private slots:
 		void modifyTaskList();
+		void taskListFileModified(const QString &fileName);
 
 	private:
 		void setFileName(const QString &fileName);
@@ -51,11 +54,14 @@ class TaskTreeWidget : public QWidget
 		Task *_rootTask;
 
 		bool _modified;
+		bool _saved;
 
 		TaskModel *_taskModel;
 		TaskSortFilterProxyModel *_taskProxyModel;
 
 		QString _fileName;
+
+		QFileSystemWatcher *_fileWatcher;
 
 		Ui::TaskTreeWidget *ui;
 };

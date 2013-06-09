@@ -25,6 +25,9 @@ class TaskTreeView : public QTreeView
 		void expandTask(const QModelIndex &index);
 
 	private:
+		int unSelectedRowBefore(const QModelIndex &index);
+		int unSelectedRowAfter(const QModelIndex &index);
+
 		void addTask();
 		void addSubtask();
 		void deleteTask();

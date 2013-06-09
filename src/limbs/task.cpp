@@ -20,6 +20,8 @@ void Task::setParent(Task *parent)
 {
 	if ( _parent )
 	{
+		disconnect(this, SIGNAL(subtasksChanged()),
+		           _parent, SIGNAL(subtasksChanged()));
 		disconnect(this, SIGNAL(dataChanged(QList<int>)),
 		           _parent, SIGNAL(dataChanged(QList<int>)));
 	}
@@ -30,6 +32,9 @@ void Task::setParent(Task *parent)
 	{
 		connect(this, SIGNAL(dataChanged(QList<int>)),
 		        _parent, SIGNAL(dataChanged(QList<int>)));
+		connect(this, SIGNAL(subtasksChanged()),
+		        _parent, SIGNAL(subtasksChanged()));
+
 	}
 }
 
@@ -66,6 +71,9 @@ bool Task::isAboveDone() const
 
 void Task::setDone(const bool done)
 {
+	if ( _done == done )
+		return;
+
 	_done = done;
 	changeNotifyRecursive();
 }
@@ -77,7 +85,11 @@ bool Task::isExpanded() const
 
 void Task::setExpanded(const bool expanded)
 {
+	if ( _expanded == expanded )
+		return;
+
 	_expanded = expanded;
+	changeNotify();
 }
 
 void Task::clear()
@@ -102,6 +114,8 @@ bool Task::appendSubtask(Task *task)
 	task->setParent(this);
 	_subtasks.append(task);
 
+	emit subtasksChanged();
+
 	return true;
 }
 
@@ -116,6 +130,8 @@ bool Task::insertSubtask(Task *task, int position)
 	task->setParent(this);
 	_subtasks.insert(position, task);
 
+	emit subtasksChanged();
+
 	return true;
 }
 
@@ -126,6 +142,8 @@ bool Task::removeSubtask(int position)
 
 	_subtasks.at(position)->setParent(0);
 	_subtasks.removeAt(position);
+
+	emit subtasksChanged();
 
 	return true;
 }

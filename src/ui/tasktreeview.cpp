@@ -9,6 +9,10 @@
 
 #include <QDebug>
 
+/*
+ *Edit: Alternatively, you could key in on either the delegate's closeEditor or commitData signals to intercept the editor's value and apply it to every selected item. You would have to subclass QTableView to accomplish this, so here's a little sample code to get you started inspired from here:
+*/
+
 TaskTreeView::TaskTreeView(QWidget *parent)
     : QTreeView(parent)
 {
@@ -126,101 +130,235 @@ void TaskTreeView::expandTask(const QModelIndex &index)
 		expandTask(index.child(i, 0));
 }
 
+int TaskTreeView::unSelectedRowBefore(const QModelIndex &index)
+{
+	if ( !index.isValid() )
+		return -1;
+
+	if ( index.row() <= 0 )
+		return -1;
+
+	int row = index.row() - 1;
+
+	while ( selectionModel()->isSelected(model()->index(row, index.column(), index.parent())) )
+	{
+		row--;
+		if ( row < 0 )
+			return -1;
+	}
+
+	return row;
+}
+
+int TaskTreeView::unSelectedRowAfter(const QModelIndex &index)
+{
+	if ( !index.isValid() )
+		return -1;
+
+	int rows = model()->rowCount(index.parent());
+
+	if ( index.row() >= rows )
+		return -1;
+
+	int row = index.row() + 1;
+
+	while ( selectionModel()->isSelected(model()->index(row, index.column(), index.parent())) )
+	{
+		row++;
+		if ( row >= rows )
+			return -1;
+	}
+
+	return row;
+}
+
 void TaskTreeView::addTask()
 {
-	if ( !model() )
-		return;
+	QList<QPersistentModelIndex> indexes;
 
-	QModelIndex index = selectionModel()->currentIndex();
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	if ( !model()->insertRow(index.row() + 1, index.parent()) )
-		return;
+	if ( indexes.size() == 0 )
+	{
+		QModelIndex index = selectionModel()->currentIndex();
 
-	index = model()->index(index.row() + 1, 0, index.parent());
+		if ( !model()->insertRow(index.row() + 1, index.parent()) )
+			return;
 
-	selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+		index = model()->index(index.row() + 1, 0, index.parent());
+
+		selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+	}
+	else
+	{
+		QItemSelection selection;
+
+		foreach (const QPersistentModelIndex &i, indexes)
+			model()->insertRow(i.row() + 1, i.parent());
+
+		QModelIndex next;
+
+		foreach (const QPersistentModelIndex &i, indexes)
+		{
+			next = model()->index(i.row() + 1, i.column(), i.parent());
+			selection.select(next, next);
+		}
+
+		selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+		selectionModel()->setCurrentIndex(next, QItemSelectionModel::ClearAndSelect);
+	}
 }
 
 void TaskTreeView::addSubtask()
 {
-	QModelIndex index = selectionModel()->currentIndex();
+	QList<QPersistentModelIndex> indexes;
 
-	if ( !model()->insertRow(0, index) )
-		return;
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	index = model()->index(0, 0, index);
+	QItemSelection selection;
 
-	selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+	foreach (const QPersistentModelIndex &i, indexes)
+		model()->insertRow(0, i);
+
+	QModelIndex next;
+
+	foreach (const QPersistentModelIndex &i, indexes)
+	{
+		next = model()->index(0, i.column(), i);
+		selection.select(next, next);
+	}
+
+	selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+	selectionModel()->setCurrentIndex(next, QItemSelectionModel::ClearAndSelect);
 }
 
 void TaskTreeView::deleteTask()
 {
-	QModelIndex index = selectionModel()->currentIndex();
+	QList<QPersistentModelIndex> indexes;
 
-	if ( index.isValid() )
-		model()->removeRow(index.row(), index.parent());
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
+
+	QPersistentModelIndex beforeFirst;
+
+	if ( indexes.size() > 0 )
+	{
+		const QPersistentModelIndex &i = indexes.at(0);
+
+		if ( i.row() == 0 )
+			beforeFirst = model()->index(i.parent().row(), i.column(), i.parent().parent());
+		else
+			beforeFirst = model()->index(i.row() - 1, i.column(), i.parent());
+	}
+
+	foreach (const QPersistentModelIndex &i, indexes)
+		if ( i.isValid() )
+			model()->removeRow(i.row(), i.parent());
+
+	selectionModel()->setCurrentIndex(beforeFirst, QItemSelectionModel::ClearAndSelect);
 }
 
 void TaskTreeView::taskMoveUp()
 {
-	QModelIndex index = selectionModel()->currentIndex();
+	QList<QPersistentModelIndex> indexes;
 
-	if ( index.row() == 0 )
-		return;
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	model()->moveRow(index.parent(), index.row(), index.parent(), index.row()-1);
+	foreach (const QPersistentModelIndex &i, indexes)
+	{
+		if ( i.isValid() && i.row() != 0 && unSelectedRowBefore(i) != -1 )
+			model()->moveRow(i.parent(), i.row(), i.parent(), i.row()-1);
+	}
 }
 
 void TaskTreeView::taskMoveDown()
 {
-	QModelIndex index = selectionModel()->currentIndex();
+	QList<QPersistentModelIndex> indexes;
 
-	if ( index.row() == model()->rowCount(index.parent()) - 1 )
-		return;
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	QModelIndex next = model()->index(index.row() + 1, index.column(), index.parent());
+	qSort(indexes.begin(), indexes.end());
 
-	model()->moveRow(next.parent(), next.row(), next.parent(), next.row()-1);
+	for(int j = indexes.size() - 1; j >= 0; j--)
+	{
+		const QPersistentModelIndex &i = indexes.at(j);
+		int rows = model()->rowCount(i.parent());
+		int row;
+
+		if ( i.isValid() && i.row() != rows - 1 && (row = unSelectedRowAfter(i)) != -1 )
+		{
+			QModelIndex next = model()->index(i.row() + 1, i.column(), i.parent());
+			model()->moveRow(next.parent(), next.row(), next.parent(), i.row());
+		}
+	}
 }
 
 void TaskTreeView::changeCurrentToSubtask()
 {
-	QModelIndex index = selectionModel()->currentIndex();
-	QModelIndex prev;
+	QList<QPersistentModelIndex> indexes;
 
-	if ( index.row() == 0 )
-		return;
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	prev = model()->index(index.row() - 1, index.column(), index.parent());
+	foreach (const QPersistentModelIndex &i, indexes)
+	{
+		QModelIndex prev;
 
-	if ( !prev.isValid() )
-		return;
+		if ( i.row() == 0 )
+			continue;
 
-	expand(prev);
+		int row = unSelectedRowBefore(i);
 
-	if ( !model()->moveRows(index.parent(), index.row(), 1, prev, model()->rowCount(prev)) )
-		return;
+		if ( row == -1 )
+			continue;
 
-	/*prev = model()->index(index.row() - 1, index.column(), index.parent());
-	selectionModel()->setCurrentIndex(model()->index(model()->rowCount(prev) - 1, 0, prev), QItemSelectionModel::ClearAndSelect);*/
+		prev = model()->index(row, i.column(), i.parent());
+
+		if ( !prev.isValid() )
+			continue;
+
+		expand(prev);
+
+		model()->moveRows(i.parent(), i.row(), 1, prev, model()->rowCount(prev));
+	}
 }
 
 void TaskTreeView::changeCurrentToTask()
 {
-	QModelIndex index = selectionModel()->currentIndex();
+	QList<QPersistentModelIndex> indexes;
 
-	if ( !index.parent().isValid() )
-		return;
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	model()->moveRows(index.parent(), index.row(), 1, index.parent().parent(), index.parent().row() + 1);
+	qSort(indexes.begin(), indexes.end());
+
+	for(int j = indexes.size() - 1; j >= 0; j--)
+	{
+		const QPersistentModelIndex &i = indexes.at(j);
+
+		if ( !i.parent().isValid() )
+			continue;
+
+		model()->moveRows(i.parent(), i.row(), 1, i.parent().parent(), i.parent().row() + 1);
+	}
 }
 
 void TaskTreeView::toggleTaskDone()
 {
-	QModelIndex index = selectionModel()->currentIndex();
+	QList<QPersistentModelIndex> indexes;
 
-	if ( !index.isValid() )
-		return;
+	foreach (const QModelIndex &i, selectionModel()->selectedIndexes())
+		indexes << i;
 
-	model()->setData(index, !model()->data(index, TaskModel::TaskDoneRole).toBool(), TaskModel::TaskDoneRole);
+	foreach (const QPersistentModelIndex &i, indexes)
+	{
+		if ( !i.isValid() )
+			return;
+
+		model()->setData(i, !model()->data(i, TaskModel::TaskDoneRole).toBool(), TaskModel::TaskDoneRole);
+	}
 }

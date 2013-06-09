@@ -40,6 +40,7 @@ class Task : public QObject
 
 	signals:
 		void dataChanged(const QList<int> &path);
+		void subtasksChanged();
 
 	private:
 		void changeNotify();

@@ -1,6 +1,10 @@
 #include "tasktreewidget.h"
 #include "ui_tasktreewidget.h"
 
+#include <QDebug>
+
+#include <QtCore/QFileSystemWatcher>
+
 #include "../limbs/task.h"
 #include "../limbs/taskfactory.h"
 #include "../models/taskmodel.h"
@@ -14,8 +18,13 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
     ui(new Ui::TaskTreeWidget)
 {
 	_modified = false;
+	_saved = false;
 
 	ui->setupUi(this);
+
+	_fileWatcher = new QFileSystemWatcher(this);
+	connect(_fileWatcher, SIGNAL(fileChanged(QString)),
+	        this, SLOT(taskListFileModified(QString)));
 
 	_rootTask = new Task(0);
 	_rootTask->setDescription(tr("(root)"));
@@ -32,15 +41,9 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	connect(_rootTask, SIGNAL(dataChanged(QList<int>)),
 	        _taskModel, SLOT(taskDataChanged(QList<int>)));
 
-	connect(_taskModel, SIGNAL(layoutChanged()),
+	connect(_rootTask, SIGNAL(dataChanged(QList<int>)),
 	        this, SLOT(modifyTaskList()));
-	connect(_taskModel, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-	        this, SLOT(modifyTaskList()));
-	connect(_taskModel, SIGNAL(rowsInserted(QModelIndex,int,int)),
-	        this, SLOT(modifyTaskList()));
-	connect(_taskModel, SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
-	        this, SLOT(modifyTaskList()));
-	connect(_taskModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
+	connect(_rootTask, SIGNAL(subtasksChanged()),
 	        this, SLOT(modifyTaskList()));
 
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
@@ -79,7 +82,17 @@ bool TaskTreeWidget::isModified() const
 
 void TaskTreeWidget::setFileName(const QString &fileName)
 {
+	if ( _fileName == fileName )
+		return;
+
+	if ( !_fileName.isEmpty() )
+		_fileWatcher->removePath(_fileName);
+
 	_fileName = fileName;
+
+	if ( !_fileName.isEmpty() )
+		_fileWatcher->addPath(_fileName);
+
 	emit fileNameChanged(fileName);
 }
 
@@ -132,6 +145,8 @@ bool TaskTreeWidget::save(const QString &fileName)
 	if ( fileName.isEmpty() )
 		return false;
 
+	_saved = true;
+
 	if ( !YamlSerialization::serialize(fileName, _rootTask) )
 		return false;
 
@@ -144,4 +159,12 @@ bool TaskTreeWidget::save(const QString &fileName)
 void TaskTreeWidget::modifyTaskList()
 {
 	setModified(true);
+}
+
+void TaskTreeWidget::taskListFileModified(const QString &fileName)
+{
+	if ( _saved )
+		_saved = false;
+	else
+		open(fileName);
 }
