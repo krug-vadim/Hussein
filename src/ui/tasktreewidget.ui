@@ -42,7 +42,11 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="search">
+       <property name="placeholderText">
+        <string>Search...</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="Line" name="line">
@@ -74,7 +78,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>tasksView</tabstop>
-  <tabstop>lineEdit</tabstop>
+  <tabstop>search</tabstop>
   <tabstop>showDone</tabstop>
  </tabstops>
  <resources/>

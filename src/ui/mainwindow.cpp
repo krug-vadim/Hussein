@@ -3,9 +3,10 @@
 
 #include "tasktreewidget.h"
 
-#include <QtWidgets/QFileDialog>
-
 #include <QtCore/QSignalMapper>
+#include <QtGui/QCloseEvent>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,9 +22,10 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(_tabsWidgetFileNameChangeMapper, SIGNAL(mapped(int)),
 	        this, SLOT(taskListFileNameChanged(int)));
 
+	connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)),
+	        this, SLOT(closeTab(int)));
+
 	setupActions();
-
-
 
 	//setCentralWidget( new TaskTreeWidget(_rootTask, this) );
 }
@@ -33,9 +35,26 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
+TaskTreeWidget * MainWindow::createNewTaskTreeWidget(const QString &title)
+{
+	TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
+
+	int index = ui->tabWidget->addTab(taskTreeWidget, title);
+	ui->tabWidget->setCurrentIndex(index);
+
+	_indexToTitle[index] = title;
+	_tabsWidgetModifyMapper->setMapping(taskTreeWidget, index);
+	connect(taskTreeWidget, SIGNAL(taskListModified()),
+	        _tabsWidgetModifyMapper, SLOT(map()));
+	connect(taskTreeWidget, SIGNAL(fileNameChanged(QString)),
+	        _tabsWidgetFileNameChangeMapper, SLOT(map()));
+
+	return taskTreeWidget;
+}
+
 void MainWindow::newFile()
 {
-	QString taskListName = tr("Tasklist %1").arg(ui->tabWidget->count() + 1);
+	QString taskListName = tr("(untitled)");
 
 	createNewTaskTreeWidget(taskListName);
 
@@ -47,7 +66,7 @@ void MainWindow::openFile()
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
 	                                                      tr("Open tasklist(s)..."),
 	                                                      QString(),
-	                                                      tr("Tasklist (*.json);;Any (*.*)"));
+	                                                      tr("Tasklist (*.yml);;Any (*.*)"));
 
 	if ( fileNames.empty() )
 		return;
@@ -59,38 +78,116 @@ void MainWindow::openFile()
 		QFileInfo fileInfo(fileName);
 
 		TaskTreeWidget *taskTreeWidget = createNewTaskTreeWidget(fileInfo.baseName());
-		taskTreeWidget->open(fileName);
+
+		if ( taskTreeWidget->open(fileName) )
+			status(tr("Opened %1.").arg(fileName));
+		else
+			status(tr("Failed to open %1.").arg(fileName));
 	}
 
 	//ui->tabWidget->setCurrentIndex();
 }
 
-void MainWindow::saveFile()
+bool MainWindow::saveTaskList(int index, bool askForNewFileName)
 {
-	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
 
 	if ( !taskTreeWidget )
-		return;
+		return false;
 
-	taskTreeWidget->save();
+	QString saveFileName;
+
+	if ( taskTreeWidget->fileName().isEmpty() || askForNewFileName )
+	{
+		saveFileName = QFileDialog::getSaveFileName(this,
+		                                            tr("Save tasklist"),
+		                                            QString(),
+		                                            tr("Tasklist (*.yml);;Any (*.*)"));
+	}
+	else
+		saveFileName = taskTreeWidget->fileName();
+
+	if ( taskTreeWidget->save(saveFileName) )
+	{
+		status(tr("Saved %1.").arg(saveFileName));
+		return true;
+	}
+	else
+	{
+		status(tr("Failed to save %1.").arg(saveFileName));
+		return false;
+	}
+}
+
+void MainWindow::saveFile()
+{
+	saveTaskList(ui->tabWidget->currentIndex());
 }
 
 void MainWindow::saveAsFile()
 {
-	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+	saveTaskList(ui->tabWidget->currentIndex(), true);
+}
+
+bool MainWindow::maybeSaveTab(int index)
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
+
+	if ( !taskTreeWidget->isModified() )
+		return true;
+
+	QMessageBox::StandardButton ret;
+
+	ret = QMessageBox::warning(this,
+	                           tr("Tasklist have been modified"),
+	                           tr("Do you want to save changes?"),
+	                           QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel);
+
+	switch ( ret )
+	{
+		case QMessageBox::Save:
+			return saveTaskList(index);
+			break;
+
+		case QMessageBox::Cancel:
+			return false;
+			break;
+
+		default:
+			return true;
+			break;
+	}
+}
+
+void MainWindow::closeTab(int index)
+{
+	if ( index < 0 || index >= ui->tabWidget->count() )
+		return;
+
+	if ( !maybeSaveTab(index) )
+		return;
+
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
 
 	if ( !taskTreeWidget )
 		return;
 
-	QString fileName = QFileDialog::getSaveFileName(this,
-	                                                tr("Save tasklist"),
-	                                                QString(),
-	                                                tr("Tasklist (*.json)"));
-
-	if ( fileName.isEmpty() )
+	if ( !taskTreeWidget->close() )
 		return;
 
-	taskTreeWidget->save(fileName);
+	ui->tabWidget->removeTab(index);
+	delete taskTreeWidget;
+}
+
+void MainWindow::closeCurrentTab()
+{
+	closeTab(ui->tabWidget->currentIndex());
+}
+
+void MainWindow::closeAllTabs()
+{
+	for(int i = 0; i < ui->tabWidget->count(); i++)
+		closeTab(i);
 }
 
 void MainWindow::taskListModified(int index)
@@ -141,23 +238,11 @@ void MainWindow::setupActions()
 	connect(ui->actionSaveAs, &QAction::triggered,
 	        this, &MainWindow::saveAsFile);
 
+	connect(ui->actionClose, &QAction::triggered,
+	        this, &MainWindow::closeCurrentTab);
+	connect(ui->actionCloseAll, &QAction::triggered,
+	        this, &MainWindow::closeAllTabs);
+
 	connect(ui->actionQuit, &QAction::triggered,
 	        this, &MainWindow::close);
-}
-
-TaskTreeWidget * MainWindow::createNewTaskTreeWidget(const QString &title)
-{
-	TaskTreeWidget *taskTreeWidget = new TaskTreeWidget(this);
-
-	int index = ui->tabWidget->addTab(taskTreeWidget, title);
-	ui->tabWidget->setCurrentIndex(index);
-
-	_indexToTitle[index] = title;
-	_tabsWidgetModifyMapper->setMapping(taskTreeWidget, index);
-	connect(taskTreeWidget, SIGNAL(taskListModified()),
-	        _tabsWidgetModifyMapper, SLOT(map()));
-	connect(taskTreeWidget, SIGNAL(fileNameChanged(QString)),
-	        _tabsWidgetFileNameChangeMapper, SLOT(map()));
-
-	return taskTreeWidget;
 }

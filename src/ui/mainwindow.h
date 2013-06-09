@@ -28,6 +28,14 @@ class MainWindow : public QMainWindow
 		void saveFile();
 		void saveAsFile();
 
+		bool saveTaskList(int index, bool askForNewFileName = false);
+
+		bool maybeSaveTab(int index);
+
+		void closeTab(int index);
+		void closeCurrentTab();
+		void closeAllTabs();
+
 		void taskListModified(int index);
 		void taskListFileNameChanged(int index);
 

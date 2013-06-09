@@ -38,20 +38,12 @@ class TaskTreeWidget : public QWidget
 
 		void showDoneChanged(int state);
 
-	protected:
-		void closeEvent(QCloseEvent *event);
-
 	private slots:
-		bool openTaskList(const QString &fileName = QString());
-		bool saveTaskList(const QString &fileName = QString());
-
 		void modifyTaskList();
 
 	private:
 		void setFileName(const QString &fileName);
 		void setModified(const bool modified);
-
-		bool maybeSave();
 
 		Task *_rootTask;
 

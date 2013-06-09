@@ -1,11 +1,6 @@
 #include "tasktreewidget.h"
 #include "ui_tasktreewidget.h"
 
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QFileDialog>
-
-#include <QtGui/QCloseEvent>
-
 #include "../limbs/task.h"
 #include "../limbs/taskfactory.h"
 #include "../models/taskmodel.h"
@@ -104,125 +99,39 @@ void TaskTreeWidget::showDoneChanged(int state)
 	ui->tasksView->expandTasks();
 }
 
-void TaskTreeWidget::closeEvent(QCloseEvent *event)
-{
-	if ( maybeSave() )
-	{
-		event->accept();
-	}
-	else
-		event->ignore();
-}
-
-bool TaskTreeWidget::maybeSave()
-{
-	if ( !isModified() )
-		return true;
-
-	QMessageBox::StandardButton ret;
-
-	ret = QMessageBox::warning(this,
-	                           tr("Tasklist have been modified"),
-	                           tr("Do you want to save changes?"),
-	                           QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel);
-
-	switch ( ret )
-	{
-		case QMessageBox::Save:
-			return save();
-			break;
-
-		case QMessageBox::Cancel:
-			return false;
-			break;
-
-		default:
-			return true;
-			break;
-	}
-}
-
 bool TaskTreeWidget::open(const QString &fileName)
 {
-	QString openFileName;
+	_rootTask->clear();
 
-	openFileName = (fileName.isEmpty()) ? this->fileName() : fileName;
-
-	if ( openFileName.isEmpty() )
-	{
-		openFileName = QFileDialog::getOpenFileName(this,
-		                                            tr("Open tasklist..."),
-		                                            QString(),
-		                                            tr("Tasklist (*.json);;Any (*.*)"));
-	}
+	if ( fileName.isEmpty() )
+		return false;
 
 	_taskModel->tasksAboutToBeReseted();
-	if ( openTaskList(openFileName) )
-	{
-		setFileName(openFileName);
-		_taskModel->tasksReseted();
-		ui->tasksView->expandTasks();
-		setModified(false);
-		emit message(tr("Opened %1.").arg(openFileName));
+	bool res = YamlSerialization::deserialize(fileName, _rootTask);
+	_taskModel->tasksReseted();
 
-		return true;
-	}
-	else
-	{
-		_taskModel->tasksReseted();
-		emit message(tr("Failed to open %1.").arg(openFileName));
+	if ( !res )
 		return false;
-	}
+
+	setFileName(fileName);
+	ui->tasksView->expandTasks();
+	setModified(false);
+
+	return true;
 }
 
 bool TaskTreeWidget::save(const QString &fileName)
 {
-	QString saveFileName;
-
-	saveFileName = (fileName.isEmpty()) ? this->fileName() : fileName;
-
-	if ( saveFileName.isEmpty() )
-	{
-		saveFileName = QFileDialog::getSaveFileName(this,
-		                                            tr("Save tasklist"),
-		                                            QString(),
-		                                            tr("Tasklist (*.json)"));
-	}
-
-	if ( saveTaskList(saveFileName) )
-	{
-		setFileName(saveFileName);
-		setModified(false);
-		emit message(tr("Saved %1.").arg(saveFileName));
-
-		return true;
-	}
-	else
-	{
-		emit message(tr("Failed to save %1.").arg(saveFileName));
-
+	if ( fileName.isEmpty() )
 		return false;
-	}
-}
 
-bool TaskTreeWidget::openTaskList(const QString &fileName)
-{
-	_rootTask->clear();
-
-	if ( !fileName.isEmpty() )
-		return YamlSerialization::deserialize(fileName, _rootTask);
-		//return JsonSerialization::deserialize(fileName, _rootTask);
-	else
+	if ( !YamlSerialization::serialize(fileName, _rootTask) )
 		return false;
-}
 
-bool TaskTreeWidget::saveTaskList(const QString &fileName)
-{
-	if ( !fileName.isEmpty() )
-		return YamlSerialization::serialize(fileName, _rootTask);
-		//return JsonSerialization::serialize(fileName, _rootTask);
-	else
-		return false;
+	setFileName(fileName);
+	setModified(false);
+
+	return true;
 }
 
 void TaskTreeWidget::modifyTaskList()
