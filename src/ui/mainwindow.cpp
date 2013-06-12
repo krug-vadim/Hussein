@@ -14,7 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+	_doExit = false;
+
 	ui->setupUi(this);
+
+	createTrayIcon();
 
 	_tabsWidgetModifyMapper = new QSignalMapper(this);
 	connect(_tabsWidgetModifyMapper, SIGNAL(mapped(int)),
@@ -225,9 +229,66 @@ void MainWindow::taskListFileNameChanged(int index)
 	taskListModified(index);
 }
 
+bool MainWindow::maybeSave()
+{
+	return false;
+}
+
+void MainWindow::quit()
+{
+	_doExit = true;
+	close();
+}
+
+void MainWindow::placeToTray()
+{
+	_trayIcon->show();
+	hide();
+}
+
+void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
+{
+	if ( reason != QSystemTrayIcon::DoubleClick )
+		return;
+
+	if ( isHidden() )
+	{
+		show();
+		raise();
+		setFocus();
+		_trayIcon->hide();
+	}
+	else
+		placeToTray();
+}
+
+void MainWindow::loadSettings()
+{
+}
+
+void MainWindow::saveSettings()
+{
+}
+
 void MainWindow::status(const QString &message)
 {
 	ui->statusbar->showMessage(message, DEFAULT_STATUS_TIME);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	if ( !_doExit )
+	{
+		placeToTray();
+		event->ignore();
+	}
+	else if ( maybeSave() )
+	{
+		saveSettings();
+		event->accept();
+	}
+	else
+		event->ignore();
 }
 
 void MainWindow::setupActions()
@@ -251,4 +312,13 @@ void MainWindow::setupActions()
 
 	connect(ui->actionQuit, &QAction::triggered,
 	        this, &MainWindow::close);
+}
+
+void MainWindow::createTrayIcon()
+{
+	_trayIcon = new QSystemTrayIcon(this);
+	_trayIcon->setIcon(QIcon(":/Hussein.ico"));
+
+	connect(_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+	        this, SLOT(trayActivated(QSystemTrayIcon::ActivationReason)));
 }

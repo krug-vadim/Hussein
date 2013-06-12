@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QSystemTrayIcon>
 
 class QSignalMapper;
 class TaskTreeWidget;
@@ -22,6 +23,9 @@ class MainWindow : public QMainWindow
 	public slots:
 		void status(const QString &message);
 
+	protected:
+		void closeEvent(QCloseEvent *event);
+
 	private slots:
 		void newFile();
 		void openFile();
@@ -39,13 +43,20 @@ class MainWindow : public QMainWindow
 		void taskListModified(int index);
 		void taskListFileNameChanged(int index);
 
-		//
-		//void placeToTray();
+		bool maybeSave();
+		void quit();
+
+		void placeToTray();
+		void trayActivated(QSystemTrayIcon::ActivationReason reason);
+
+		void loadSettings();
+		void saveSettings();
 
 	private:
 		static const int DEFAULT_STATUS_TIME = 3000;
 
 		void setupActions();
+		void createTrayIcon();
 
 		TaskTreeWidget *createNewTaskTreeWidget(const QString &title);
 
@@ -53,6 +64,9 @@ class MainWindow : public QMainWindow
 		QSignalMapper *_tabsWidgetFileNameChangeMapper;
 
 		QHash<int, QString> _indexToTitle;
+
+		bool _doExit;
+		QSystemTrayIcon *_trayIcon;
 
 		Ui::MainWindow *ui;
 };
