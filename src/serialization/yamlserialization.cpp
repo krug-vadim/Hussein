@@ -4,6 +4,10 @@
 
 #include <QtCore/QFile>
 
+#include <QtCore/QHashIterator>
+#include <QtCore/QString>
+#include <QtCore/QVariant>
+
 #include "../limbs/task.h"
 
 
@@ -64,12 +68,53 @@ bool YamlSerialization::deserialize(const QString &fileName, Task *root)
 	return true;
 }
 
+QByteArray YamlSerialization::serializeSettings(const QVariantHash &settings)
+{
+	YAML::Emitter out;
+
+	out << YAML::BeginMap;
+
+	QHashIterator<QString, QVariant> i(settings);
+	while ( i.hasNext() )
+	{
+		i.next();
+
+		out << YAML::Key << i.key().toStdString();
+
+		QVariant data = i.value();
+
+		if ( data.canConvert(QMetaType::QString) )
+			out << YAML::Value << data.toString().toStdString();
+		else
+			out << YAML::Value << QString("(wrong type %1)").arg(i.value().type()).toStdString();
+	}
+
+	out << YAML::EndMap;
+
+
+	/*out << YAML::Key << "done";
+	out << YAML::Value << task->isDone();
+
+	out << YAML::Key << "expanded";
+	out << YAML::Value << task->isExpanded();
+
+	if ( !task->subtasks().empty() )
+	{
+		out << YAML::Key << "tasks";
+		out << YAML::Value << YAML::BeginSeq;
+
+		foreach(Task *subTask, task->subtasks())
+			serializeTask(out, subTask);
+
+		out << YAML::EndSeq;
+	}*/
+
+
+
+}
+
 void YamlSerialization::serializeTask(YAML::Emitter &out, Task *task)
 {
-//	object.insert(QString("description"), QJsonValue());
-//	object.insert(QString("done"), QJsonValue(task->isDone()));
-//	object.insert(QString("expanded"), QJsonValue(task->isExpanded()));
-
 	out << YAML::BeginMap;
 
 	out << YAML::Key << "description";

@@ -231,7 +231,13 @@ void MainWindow::taskListFileNameChanged(int index)
 
 bool MainWindow::maybeSave()
 {
-	return false;
+	bool maybe;
+
+	maybe = true;
+	for(int i = 0; i < ui->tabWidget->count(); i++)
+		maybe = maybe && maybeSaveTab(i);
+
+	return maybe;
 }
 
 void MainWindow::quit()
@@ -268,6 +274,23 @@ void MainWindow::loadSettings()
 
 void MainWindow::saveSettings()
 {
+	QVariantHash settings;
+
+	QStringList openedFiles;
+
+	for(int i = 0; i < ui->tabWidget->count(); i++)
+	{
+		TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(i));
+
+		if ( taskTreeWidget )
+			openedFiles << taskTreeWidget->fileName();
+	}
+
+	settings["width"] = this->width();
+	settings["height"] = this->height();
+	settings["files"] = openedFiles;
+
+	//QVariant()
 }
 
 void MainWindow::status(const QString &message)
@@ -311,7 +334,7 @@ void MainWindow::setupActions()
 	        this, &MainWindow::closeAllTabs);
 
 	connect(ui->actionQuit, &QAction::triggered,
-	        this, &MainWindow::close);
+	        this, &MainWindow::quit);
 }
 
 void MainWindow::createTrayIcon()

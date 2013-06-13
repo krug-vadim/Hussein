@@ -2,16 +2,16 @@
 #define YAMLSERIALIZATION_H
 
 #include <QtCore/QByteArray>
+#include <QtCore/QHash>
+#include <QtCore/QVariant>
 
 class Task;
-class QJsonArray;
-class QJsonObject;
 
 namespace YAML
 {
 	class Emitter;
 	class Node;
-};
+}
 
 class YamlSerialization
 {
@@ -23,6 +23,8 @@ class YamlSerialization
 
 		static void deserialize(const QByteArray &yaml, Task *root);
 		static bool deserialize(const QString &fileName, Task *root);
+
+		static QByteArray serializeSettings(const QVariantHash &settings);
 
 	private:
 		static void serializeTask(YAML::Emitter &out, Task *task);
