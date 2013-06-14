@@ -61,6 +61,11 @@ void YamlSerialization::deserialize(const QByteArray &yaml, Task *root)
 
 bool YamlSerialization::deserialize(const QString &fileName, Task *root)
 {
+	QFile file(fileName);
+
+	if ( !file.exists() )
+		return false;
+
 	YAML::Node node = YAML::LoadFile(fileName.toStdString());
 
 	deserializeRoot(node, root);
@@ -128,6 +133,27 @@ bool YamlSerialization::serializeSettings(const QString &fileName, const QVarian
 	}
 	else
 		return false;
+}
+
+void YamlSerialization::deserializeSettings(const QByteArray &yaml, QVariantHash &settings)
+{
+	YAML::Node node = YAML::Load(yaml.constData());
+
+	deserializeSettingsToHash(node, settings);
+}
+
+bool YamlSerialization::deserializeSettings(const QString &fileName, QVariantHash &settings)
+{
+	QFile file(fileName);
+
+	if ( !file.exists() )
+		return false;
+
+	YAML::Node node = YAML::LoadFile(fileName.toStdString());
+
+	deserializeSettingsToHash(node, settings);
+
+	return true;
 }
 
 void YamlSerialization::serializeTask(YAML::Emitter &out, Task *task)
@@ -214,4 +240,29 @@ Task *YamlSerialization::deserializeTask(const YAML::Node &node)
 		task->appendSubtask(deserializeTask(subTask));
 
 	return task;
+}
+
+void YamlSerialization::deserializeSettingsToHash(const YAML::Node &node, QVariantHash &settings)
+{
+	if ( node.IsNull() )
+		return;
+
+	if ( !node.IsMap() )
+		return;
+
+	for(YAML::const_iterator it = node.begin(); it != node.end(); ++it)
+	{
+		if ( it->second.IsNull() )
+			continue;
+
+		if ( it->second.IsScalar() )
+			settings[QString::fromStdString(it->first.as<std::string>())] = QString::fromStdString(it->second.as<std::string>());
+		else if ( it->second.IsSequence() )
+		{
+			QStringList list;
+			foreach(const YAML::Node &seq, it->second)
+				list << QString::fromStdString(seq.as<std::string>());
+			settings[QString::fromStdString(it->first.as<std::string>())] = list;
+		}
+	}
 }

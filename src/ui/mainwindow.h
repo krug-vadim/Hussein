@@ -53,6 +53,7 @@ class MainWindow : public QMainWindow
 		void saveSettings();
 
 	private:
+		void openFiles(const QStringList fileNames);
 		static const int DEFAULT_STATUS_TIME = 3000;
 
 		void setupActions();

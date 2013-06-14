@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	setupActions();
 
+	loadSettings();
+
 	//setCentralWidget( new TaskTreeWidget(_rootTask, this) );
 }
 
@@ -79,6 +81,11 @@ void MainWindow::openFile()
 	                                                      QString(),
 	                                                      tr("Tasklist (*.yml);;Any (*.*)"));
 
+	openFiles(fileNames);
+}
+
+void MainWindow::openFiles(const QStringList fileNames)
+{
 	if ( fileNames.empty() )
 		return;
 
@@ -272,6 +279,21 @@ void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
 
 void MainWindow::loadSettings()
 {
+	QVariantHash settings;
+	QString settingsSavePath;
+
+	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
+
+	YamlSerialization::deserializeSettings(settingsSavePath, settings);
+
+	if ( settings.contains(tr("geometry")) )
+		restoreGeometry(QByteArray::fromHex(settings.value(tr("geometry"), QByteArray()).toByteArray()));
+
+	if ( settings.contains(tr("state")) )
+		restoreState(QByteArray::fromHex(settings.value(tr("state"), QByteArray()).toByteArray()));
+
+	if ( settings.contains(tr("files")) )
+		openFiles(settings.value(tr("files"), QStringList()).toStringList());
 }
 
 void MainWindow::saveSettings()
