@@ -11,11 +11,14 @@ class TaskSortFilterProxyModel : public QSortFilterProxyModel
 		explicit TaskSortFilterProxyModel(QObject *parent = 0);
 
 		bool showDone() const;
+		QString searchString() const;
 
 		bool moveRows(const QModelIndex & sourceParent, int sourceRow, int count, const QModelIndex & destinationParent, int destinationChild);
 
 	public slots:
 		void setShowDone(const bool show);
+
+		void setSearchString(const QString &search);
 
 	protected:
 		//bool filterAcceptsColumn(int sourceColumn, const QModelIndex &sourceParent) const;
@@ -23,6 +26,7 @@ class TaskSortFilterProxyModel : public QSortFilterProxyModel
 
 	private:
 		bool _showDone;
+		QString _searchString;
 
 };
 

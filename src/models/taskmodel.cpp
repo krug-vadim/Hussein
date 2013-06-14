@@ -98,6 +98,10 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 			}
 			break;
 
+		case TaskModel::TaskDescriptionRole:
+			return task->description();
+			break;
+
 		case TaskModel::TaskDoneRole:
 			return task->isDone();
 			break;
@@ -166,6 +170,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 	switch ( role )
 	{
 		case Qt::EditRole:
+		case TaskModel::TaskDescriptionRole:
 			//result = item->setData(index.column(), value);
 			task->setDescription(value.toString());
 			result = true;

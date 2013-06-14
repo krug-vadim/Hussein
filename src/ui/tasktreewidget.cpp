@@ -5,6 +5,8 @@
 
 #include <QtCore/QFileSystemWatcher>
 
+#include <QtGui/QKeyEvent>
+
 #include "../limbs/task.h"
 #include "../limbs/taskfactory.h"
 #include "../models/taskmodel.h"
@@ -19,6 +21,7 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 {
 	_modified = false;
 	_saved = false;
+	_title = tr("(untitled)");
 
 	ui->setupUi(this);
 
@@ -49,6 +52,8 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);
 	_taskProxyModel->setDynamicSortFilter(true);
+	connect(ui->search, &QLineEdit::textChanged,
+	        this, &TaskTreeWidget::setSearchString);
 
 	ui->showDone->setChecked(_taskProxyModel->showDone());
 	connect(ui->showDone, &QCheckBox::stateChanged,
@@ -73,6 +78,11 @@ Task *TaskTreeWidget::root() const
 QString TaskTreeWidget::fileName() const
 {
 	return _fileName;
+}
+
+QString TaskTreeWidget::title() const
+{
+	return _title;
 }
 
 bool TaskTreeWidget::isModified() const
@@ -119,6 +129,25 @@ void TaskTreeWidget::showEvent(QShowEvent * event)
 	QWidget::showEvent(event);
 }
 
+void TaskTreeWidget::keyPressEvent(QKeyEvent *event)
+{
+	switch ( event->key() )
+	{
+		case Qt::Key_Escape:
+			if ( ui->tasksView->hasFocus() )
+				ui->search->setFocus();
+			else
+				ui->tasksView->setFocus();
+			break;
+
+		default:
+			QWidget::keyPressEvent(event);
+			return;
+	}
+
+	event->accept();
+}
+
 bool TaskTreeWidget::open(const QString &fileName)
 {
 	_rootTask->clear();
@@ -145,15 +174,32 @@ bool TaskTreeWidget::save(const QString &fileName)
 	if ( fileName.isEmpty() )
 		return false;
 
+	if ( _fileWatcher->files().contains(fileName) )
+		_fileWatcher->removePath(fileName);
+
 	_saved = true;
 
-	if ( !YamlSerialization::serialize(fileName, _rootTask) )
+	bool res = YamlSerialization::serialize(fileName, _rootTask);
+
+	_fileWatcher->addPath(fileName);
+
+	if ( !res )
 		return false;
 
 	setFileName(fileName);
 	setModified(false);
 
 	return true;
+}
+
+void TaskTreeWidget::toggleDone()
+{
+	ui->showDone->toggle();
+}
+
+void TaskTreeWidget::setTitle(const QString &title)
+{
+	_title = title;
 }
 
 void TaskTreeWidget::modifyTaskList()
@@ -167,4 +213,11 @@ void TaskTreeWidget::taskListFileModified(const QString &fileName)
 		_saved = false;
 	else
 		open(fileName);
+}
+
+void TaskTreeWidget::setSearchString(const QString &text)
+{
+	_taskProxyModel->setSearchString(text);
+
+	ui->tasksView->expandTasks();
 }

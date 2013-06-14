@@ -63,14 +63,14 @@ bool YamlSerialization::deserialize(const QString &fileName, Task *root)
 {
 	QFile file(fileName);
 
-	if ( !file.exists() )
+	if ( file.open(QIODevice::ReadOnly|QIODevice::Text) )
+	{
+		YamlSerialization::deserialize(file.readAll(), root);
+		file.close();
+		return true;
+	}
+	else
 		return false;
-
-	YAML::Node node = YAML::LoadFile(fileName.toStdString());
-
-	deserializeRoot(node, root);
-
-	return true;
 }
 
 QByteArray YamlSerialization::serializeSettings(const QVariantHash &settings)
@@ -93,6 +93,14 @@ QByteArray YamlSerialization::serializeSettings(const QVariantHash &settings)
 		{
 			case QMetaType::QString:
 				out << YAML::Value << data.toString().toStdString();
+				break;
+
+			case QMetaType::Int:
+				out << YAML::Value << data.toInt();
+				break;
+
+			case QMetaType::Bool:
+				out << YAML::Value << data.toBool();
 				break;
 
 			case QMetaType::QByteArray:
@@ -149,7 +157,7 @@ bool YamlSerialization::deserializeSettings(const QString &fileName, QVariantHas
 	if ( !file.exists() )
 		return false;
 
-	YAML::Node node = YAML::LoadFile(fileName.toStdString());
+	YAML::Node node = YAML::LoadFile(fileName.toUtf8().constData());
 
 	deserializeSettingsToHash(node, settings);
 

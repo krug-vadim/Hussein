@@ -40,8 +40,8 @@ class MainWindow : public QMainWindow
 		void closeCurrentTab();
 		void closeAllTabs();
 
-		void taskListModified(int index);
-		void taskListFileNameChanged(int index);
+		void taskListModified(QWidget *widget);
+		void taskListFileNameChanged(QWidget *widget);
 
 		bool maybeSave();
 		void quit();
@@ -51,6 +51,10 @@ class MainWindow : public QMainWindow
 
 		void loadSettings();
 		void saveSettings();
+
+		void toggleTaskDone();
+
+		void tabMoved(int from, int to);
 
 	private:
 		void openFiles(const QStringList fileNames);
@@ -63,8 +67,6 @@ class MainWindow : public QMainWindow
 
 		QSignalMapper *_tabsWidgetModifyMapper;
 		QSignalMapper *_tabsWidgetFileNameChangeMapper;
-
-		QHash<int, QString> _indexToTitle;
 
 		bool _doExit;
 		QSystemTrayIcon *_trayIcon;

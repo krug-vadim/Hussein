@@ -15,6 +15,11 @@ bool TaskSortFilterProxyModel::showDone() const
 	return _showDone;
 }
 
+QString TaskSortFilterProxyModel::searchString() const
+{
+	return _searchString;
+}
+
 bool TaskSortFilterProxyModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
 {
 	if ( !sourceModel() )
@@ -48,14 +53,39 @@ void TaskSortFilterProxyModel::setShowDone(const bool show)
 	invalidateFilter();
 }
 
+void TaskSortFilterProxyModel::setSearchString(const QString &search)
+{
+	_searchString = search;
+	invalidateFilter();
+}
+
 bool TaskSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
 	QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
 
 	bool taskDone = sourceModel()->data(index, TaskModel::TaskDoneRole).toBool();
+	QString taskDescription = sourceModel()->data(index, TaskModel::TaskDescriptionRole).toString();
 
 	if ( !showDone() && taskDone )
 		return false;
 
-	return true;
+	if ( searchString().simplified().isEmpty() )
+		return true;
+
+	/*foreach(QString tag, searchTags())
+		res = res && task->text().contains(tag);*/
+
+	if ( taskDescription.simplified().contains(searchString().simplified()) )
+		return true;
+
+	if ( sourceModel()->hasChildren(index) )
+	{
+		for(int i = 0; i < sourceModel()->rowCount(index); i++)
+		{
+			if ( filterAcceptsRow(i, index) )
+				return true;
+		}
+	}
+
+	return false;
 }

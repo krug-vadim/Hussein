@@ -23,15 +23,18 @@ MainWindow::MainWindow(QWidget *parent) :
 	createTrayIcon();
 
 	_tabsWidgetModifyMapper = new QSignalMapper(this);
-	connect(_tabsWidgetModifyMapper, SIGNAL(mapped(int)),
-	        this, SLOT(taskListModified(int)));
+	connect(_tabsWidgetModifyMapper, SIGNAL(mapped(QWidget*)),
+	        this, SLOT(taskListModified(QWidget*)));
 
 	_tabsWidgetFileNameChangeMapper = new QSignalMapper(this);
-	connect(_tabsWidgetFileNameChangeMapper, SIGNAL(mapped(int)),
-	        this, SLOT(taskListFileNameChanged(int)));
+	connect(_tabsWidgetFileNameChangeMapper, SIGNAL(mapped(QWidget*)),
+	        this, SLOT(taskListFileNameChanged(QWidget*)));
 
 	connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)),
 	        this, SLOT(closeTab(int)));
+
+	connect(ui->tabWidget->tabBar(), SIGNAL(tabMoved(int,int)),
+	        this, SLOT(tabMoved(int,int)));
 
 	setupActions();
 
@@ -52,10 +55,8 @@ TaskTreeWidget * MainWindow::createNewTaskTreeWidget(const QString &title)
 	int index = ui->tabWidget->addTab(taskTreeWidget, title);
 	ui->tabWidget->setCurrentIndex(index);
 
-	_indexToTitle[index] = title;
-
-	_tabsWidgetModifyMapper->setMapping(taskTreeWidget, index);
-	_tabsWidgetFileNameChangeMapper->setMapping(taskTreeWidget, index);
+	_tabsWidgetModifyMapper->setMapping(taskTreeWidget, taskTreeWidget);
+	_tabsWidgetFileNameChangeMapper->setMapping(taskTreeWidget, taskTreeWidget);
 
 	connect(taskTreeWidget, SIGNAL(taskListModified()),
 	        _tabsWidgetModifyMapper, SLOT(map()));
@@ -193,7 +194,14 @@ void MainWindow::closeTab(int index)
 	if ( !taskTreeWidget->close() )
 		return;
 
-	ui->tabWidget->removeTab(index);
+	_tabsWidgetModifyMapper->removeMappings(taskTreeWidget);
+	_tabsWidgetFileNameChangeMapper->removeMappings(taskTreeWidget);
+
+	disconnect(taskTreeWidget, SIGNAL(taskListModified()),
+	           _tabsWidgetModifyMapper, SLOT(map()));
+	disconnect(taskTreeWidget, SIGNAL(fileNameChanged(QString)),
+	           _tabsWidgetFileNameChangeMapper, SLOT(map()));
+
 	delete taskTreeWidget;
 }
 
@@ -204,28 +212,30 @@ void MainWindow::closeCurrentTab()
 
 void MainWindow::closeAllTabs()
 {
-	for(int i = 0; i < ui->tabWidget->count(); i++)
-		closeTab(i);
+	while ( ui->tabWidget->count() > 0 )
+		closeTab(0);
 }
 
-void MainWindow::taskListModified(int index)
+#include <QDebug>
+
+void MainWindow::taskListModified(QWidget *widget)
 {
-	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(widget);
 
 	if ( !taskTreeWidget )
 		return;
 
-	QString newTabTitle = _indexToTitle.value(index);
+	QString newTabTitle = taskTreeWidget->title();
 
 	if ( taskTreeWidget->isModified() )
 		newTabTitle += "*";
 
-	ui->tabWidget->setTabText(index, newTabTitle);
+	ui->tabWidget->setTabText(ui->tabWidget->indexOf(widget), newTabTitle);
 }
 
-void MainWindow::taskListFileNameChanged(int index)
+void MainWindow::taskListFileNameChanged(QWidget *widget)
 {
-	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->widget(index));
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(widget);
 
 	if ( !taskTreeWidget )
 		return;
@@ -233,9 +243,8 @@ void MainWindow::taskListFileNameChanged(int index)
 	QFileInfo fileInfo;
 
 	fileInfo.setFile(taskTreeWidget->fileName());
-
-	_indexToTitle[index] = fileInfo.baseName();
-	taskListModified(index);
+	taskTreeWidget->setTitle(fileInfo.baseName());
+	taskListModified(widget);
 }
 
 bool MainWindow::maybeSave()
@@ -294,6 +303,9 @@ void MainWindow::loadSettings()
 
 	if ( settings.contains(tr("files")) )
 		openFiles(settings.value(tr("files"), QStringList()).toStringList());
+
+	if ( settings.contains(tr("current")) )
+		ui->tabWidget->setCurrentIndex( settings.value(tr("current"), -1).toInt() );
 }
 
 void MainWindow::saveSettings()
@@ -313,12 +325,28 @@ void MainWindow::saveSettings()
 	settings["geometry"] = this->saveGeometry();
 	settings["state"] = this->saveState();
 	settings["files"] = openedFiles;
+	settings["current"] = ui->tabWidget->currentIndex();
+
 
 	QString settingsSavePath;
 
 	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
 
 	YamlSerialization::serializeSettings(settingsSavePath, settings);
+}
+
+void MainWindow::toggleTaskDone()
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+
+	if ( !taskTreeWidget )
+		return;
+
+	taskTreeWidget->toggleDone();
+}
+
+void MainWindow::tabMoved(int from, int to)
+{
 }
 
 void MainWindow::status(const QString &message)
@@ -363,6 +391,10 @@ void MainWindow::setupActions()
 
 	connect(ui->actionQuit, &QAction::triggered,
 	        this, &MainWindow::quit);
+
+	// menu edit
+	connect(ui->actionToggleDone, &QAction::triggered,
+	        this, &MainWindow::toggleTaskDone);
 }
 
 void MainWindow::createTrayIcon()

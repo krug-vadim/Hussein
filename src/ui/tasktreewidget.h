@@ -25,6 +25,7 @@ class TaskTreeWidget : public QWidget
 		Task *root() const;
 
 		QString fileName() const;
+		QString title() const;
 
 		bool isModified() const;
 
@@ -38,18 +39,27 @@ class TaskTreeWidget : public QWidget
 		bool open(const QString &fileName = QString());
 		bool save(const QString &fileName = QString());
 
-		void showDoneChanged(int state);
+		void toggleDone();
+
+		void setTitle(const QString &title);
 
 	protected:
-		void showEvent(QShowEvent * event);
+		virtual void showEvent(QShowEvent * event);
+		virtual void keyPressEvent(QKeyEvent *event);
 
 	private slots:
+		void showDoneChanged(int state);
 		void modifyTaskList();
 		void taskListFileModified(const QString &fileName);
+
+		void setSearchString(const QString &text);
 
 	private:
 		void setFileName(const QString &fileName);
 		void setModified(const bool modified);
+
+		/*void createModel();
+		void createProxyModel();*/
 
 		Task *_rootTask;
 
@@ -60,6 +70,7 @@ class TaskTreeWidget : public QWidget
 		TaskSortFilterProxyModel *_taskProxyModel;
 
 		QString _fileName;
+		QString _title;
 
 		QFileSystemWatcher *_fileWatcher;
 

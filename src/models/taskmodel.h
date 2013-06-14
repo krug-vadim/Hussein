@@ -15,6 +15,7 @@ class TaskModel : public QAbstractItemModel
 		{
 			TaskDoneRole = Qt::UserRole,
 			TaskExpandedRole,
+			TaskDescriptionRole,
 		}
 		TaskDataRole;
 
