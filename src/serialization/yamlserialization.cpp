@@ -6,10 +6,10 @@
 
 #include <QtCore/QHashIterator>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
 #include "../limbs/task.h"
-
 
 YamlSerialization::YamlSerialization()
 {
@@ -71,6 +71,7 @@ bool YamlSerialization::deserialize(const QString &fileName, Task *root)
 QByteArray YamlSerialization::serializeSettings(const QVariantHash &settings)
 {
 	YAML::Emitter out;
+	QStringList list;
 
 	out << YAML::BeginMap;
 
@@ -83,34 +84,50 @@ QByteArray YamlSerialization::serializeSettings(const QVariantHash &settings)
 
 		QVariant data = i.value();
 
-		if ( data.canConvert(QMetaType::QString) )
-			out << YAML::Value << data.toString().toStdString();
-		else
-			out << YAML::Value << QString("(wrong type %1)").arg(i.value().type()).toStdString();
+		switch ( data.type() )
+		{
+			case QMetaType::QString:
+				out << YAML::Value << data.toString().toStdString();
+				break;
+
+			case QMetaType::QByteArray:
+				out << YAML::Value << QString(i.value().toByteArray().toHex()).toStdString();
+				break;
+
+			case QMetaType::QStringList:
+				list = data.toStringList();
+				out << YAML::Value << YAML::BeginSeq;
+
+				foreach(const QString &string, list)
+					out << YAML::Value << string.toStdString();
+
+				out << YAML::EndSeq;
+				break;
+
+			default:
+				out << YAML::Value << QString("(wrong type %1)").arg(i.value().type()).toStdString();
+				break;
+		}
 	}
 
 	out << YAML::EndMap;
 
+	return QByteArray(out.c_str());
+}
 
-	/*out << YAML::Key << "done";
-	out << YAML::Value << task->isDone();
+bool YamlSerialization::serializeSettings(const QString &fileName, const QVariantHash &settings)
+{
+	QFile file(fileName);
 
-	out << YAML::Key << "expanded";
-	out << YAML::Value << task->isExpanded();
-
-	if ( !task->subtasks().empty() )
+	if ( file.open(QIODevice::WriteOnly|QIODevice::Text) )
 	{
-		out << YAML::Key << "tasks";
-		out << YAML::Value << YAML::BeginSeq;
-
-		foreach(Task *subTask, task->subtasks())
-			serializeTask(out, subTask);
-
-		out << YAML::EndSeq;
-	}*/
-
-
-
+		file.write(YamlSerialization::serializeSettings(settings));
+		file.flush();
+		file.close();
+		return true;
+	}
+	else
+		return false;
 }
 
 void YamlSerialization::serializeTask(YAML::Emitter &out, Task *task)

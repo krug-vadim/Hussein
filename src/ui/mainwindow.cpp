@@ -10,6 +10,8 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 
+#include "../serialization/yamlserialization.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -286,11 +288,15 @@ void MainWindow::saveSettings()
 			openedFiles << taskTreeWidget->fileName();
 	}
 
-	settings["width"] = this->width();
-	settings["height"] = this->height();
+	settings["geometry"] = this->saveGeometry();
+	settings["state"] = this->saveState();
 	settings["files"] = openedFiles;
 
-	//QVariant()
+	QString settingsSavePath;
+
+	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
+
+	YamlSerialization::serializeSettings(settingsSavePath, settings);
 }
 
 void MainWindow::status(const QString &message)

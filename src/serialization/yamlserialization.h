@@ -25,6 +25,7 @@ class YamlSerialization
 		static bool deserialize(const QString &fileName, Task *root);
 
 		static QByteArray serializeSettings(const QVariantHash &settings);
+		static bool serializeSettings(const QString &fileName, const QVariantHash &settings);
 
 	private:
 		static void serializeTask(YAML::Emitter &out, Task *task);
