@@ -65,7 +65,11 @@
     </layout>
    </item>
    <item>
-    <widget class="TaskTreeView" name="tasksView"/>
+    <widget class="TaskTreeView" name="tasksView">
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

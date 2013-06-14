@@ -33,9 +33,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)),
 	        this, SLOT(closeTab(int)));
 
-	connect(ui->tabWidget->tabBar(), SIGNAL(tabMoved(int,int)),
-	        this, SLOT(tabMoved(int,int)));
-
 	setupActions();
 
 	loadSettings();
@@ -343,10 +340,6 @@ void MainWindow::toggleTaskDone()
 		return;
 
 	taskTreeWidget->toggleDone();
-}
-
-void MainWindow::tabMoved(int from, int to)
-{
 }
 
 void MainWindow::status(const QString &message)

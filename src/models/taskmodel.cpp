@@ -6,6 +6,8 @@
 #include <QtGui/QFont>
 #include <QtGui/QPalette>
 
+#include <QtCore/QMimeData>0
+
 #include <QDebug>
 
 TaskModel::TaskModel(QObject *parent) :
@@ -120,7 +122,14 @@ Qt::ItemFlags TaskModel::flags(const QModelIndex &index) const
 	if ( !index.isValid() )
 		return 0;
 
-	return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	return Qt::ItemIsEditable
+	     | Qt::ItemIsEnabled
+	     | Qt::ItemIsSelectable
+	     | Qt::ItemIsDragEnabled
+	     | Qt::ItemIsDropEnabled
+	     ;
+
+	//return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 QVariant TaskModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -298,6 +307,56 @@ void TaskModel::tasksAboutToBeReseted()
 void TaskModel::tasksReseted()
 {
 	emit endResetModel();
+}
+
+Qt::DropActions TaskModel::supportedDropActions() const
+{
+	return Qt::MoveAction;
+}
+
+QStringList TaskModel::mimeTypes() const
+{
+	QStringList types;
+	types << "text/plain";
+	return types;
+}
+
+QMimeData *TaskModel::mimeData(const QModelIndexList &indexes) const
+{
+	QMimeData *mimeData = new QMimeData();
+	QByteArray encodedData;
+
+	QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+	foreach (const QModelIndex &index, indexes)
+	{
+		if (index.isValid())
+		{
+			QString text = data(index, Qt::DisplayRole).toString();
+			stream << text;
+		}
+	}
+
+	mimeData->setData("text/plain", encodedData);
+	return mimeData;
+}
+
+bool TaskModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+{
+	if ( action == Qt::IgnoreAction )
+		return true;
+
+	if ( action != Qt::MoveAction )
+		return false;
+
+	if (!data->hasFormat("text/plain"))
+		return false;
+
+	if (column > 0)
+		return false;
+
+	//qDebug() << "No hope";
+	return false;
 }
 
 void TaskModel::taskDataChanged(const QList<int> &path)

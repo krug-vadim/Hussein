@@ -196,22 +196,28 @@ void YamlSerialization::deserializeRoot(const YAML::Node &node, Task *root)
 	if ( node.IsNull() )
 		return;
 
-	if ( !node.IsMap() )
-		return;
+	if ( node.IsMap() )
+	{
+		if ( !node["tasks"] )
+			return;
 
-	if ( !node["tasks"] )
-		return;
+		YAML::Node tasks = node["tasks"];
 
-	YAML::Node tasks = node["tasks"];
+		if ( tasks.IsNull() )
+			return;
 
-	if ( tasks.IsNull() )
-		return;
+		if ( !tasks.IsSequence() )
+			return;
 
-	if ( !tasks.IsSequence() )
-		return;
+		foreach(YAML::Node node, tasks)
+			root->appendSubtask(deserializeTask(node));
+	}
 
-	foreach(YAML::Node node, tasks)
-		root->appendSubtask(deserializeTask(node));
+	if ( node.IsSequence() )
+	{
+		foreach(YAML::Node task, node)
+			root->appendSubtask(deserializeTask(task));
+	}
 }
 
 Task *YamlSerialization::deserializeTask(const YAML::Node &node)
@@ -226,6 +232,9 @@ Task *YamlSerialization::deserializeTask(const YAML::Node &node)
 
 	if ( node["description"] )
 		task->setDescription( QString::fromStdString(node["description"].as<std::string>()) );
+
+	if ( node["what"] )
+		task->setDescription( QString::fromStdString(node["what"].as<std::string>()) );
 
 	if ( node["done"] )
 		task->setDone( node["done"].as<bool>() );

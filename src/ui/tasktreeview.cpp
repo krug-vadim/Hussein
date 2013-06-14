@@ -26,6 +26,13 @@ TaskTreeView::TaskTreeView(QWidget *parent)
 
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+	setUniformRowHeights(true);
+
+	setAcceptDrops(true);
+	setDropIndicatorShown(true);
+	setDragEnabled(true);
+	setDragDropMode(QAbstractItemView::InternalMove);
+
 	connect(this, &TaskTreeView::collapsed,
 	        this, &TaskTreeView::taskCollapsed);
 	connect(this, &TaskTreeView::expanded,

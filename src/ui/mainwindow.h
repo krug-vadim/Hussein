@@ -54,11 +54,10 @@ class MainWindow : public QMainWindow
 
 		void toggleTaskDone();
 
-		void tabMoved(int from, int to);
-
 	private:
-		void openFiles(const QStringList fileNames);
 		static const int DEFAULT_STATUS_TIME = 3000;
+
+		void openFiles(const QStringList fileNames);
 
 		void setupActions();
 		void createTrayIcon();
