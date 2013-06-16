@@ -36,7 +36,7 @@ class TaskTreeWidget : public QWidget
 		void message(const QString &text);
 
 	public slots:
-		bool open(const QString &fileName = QString());
+		bool load(const QString &fileName = QString());
 		bool save(const QString &fileName = QString());
 
 		void toggleDone();
@@ -61,10 +61,7 @@ class TaskTreeWidget : public QWidget
 		/*void createModel();
 		void createProxyModel();*/
 
-		Task *_rootTask;
-
 		bool _modified;
-		bool _saved;
 
 		TaskModel *_taskModel;
 		TaskSortFilterProxyModel *_taskProxyModel;

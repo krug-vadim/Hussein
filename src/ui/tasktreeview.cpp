@@ -28,10 +28,11 @@ TaskTreeView::TaskTreeView(QWidget *parent)
 
 	setUniformRowHeights(true);
 
-	setAcceptDrops(true);
-	setDropIndicatorShown(true);
-	setDragEnabled(true);
-	setDragDropMode(QAbstractItemView::InternalMove);
+	setAcceptDrops(false);
+	setDropIndicatorShown(false);
+	setDragEnabled(false);
+	//setDragDropMode(QAbstractItemView::InternalMove);
+	//setDragDropMode(QAbstractItemView::DragDrop);
 
 	connect(this, &TaskTreeView::collapsed,
 	        this, &TaskTreeView::taskCollapsed);
@@ -113,6 +114,26 @@ void TaskTreeView::paintEvent(QPaintEvent *event)
 		QTreeView::paintEvent(event);
 }
 
+void TaskTreeView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+	qDebug() << "dataChanged";
+	QTreeView::dataChanged(topLeft, bottomRight, roles);
+	//expandTasks();
+}
+
+//
+
+void TaskTreeView::rowsInserted(const QModelIndex &parent, int start, int end)
+{
+	qDebug() << "rowsInserted";
+	QTreeView::rowsInserted(parent, start, end);
+	//expandTasks();
+	if ( parent.isValid() )
+		expandTask(parent);
+	else
+		expandTasks();
+}
+
 void TaskTreeView::taskCollapsed(const QModelIndex &index)
 {
 	model()->setData(index, false, TaskModel::TaskExpandedRole);
@@ -129,12 +150,39 @@ void TaskTreeView::expandTasks()
 		expandTask(model()->index(i, 0));
 }
 
+void TaskTreeView::setModel(QAbstractItemModel *model)
+{
+	if ( this->model() )
+	{
+		disconnect(this->model(), SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
+		           this, SLOT(rowsMoved(QModelIndex,int,int,QModelIndex,int)));
+	}
+
+	QTreeView::setModel(model);
+
+	if ( this->model() )
+	{
+		connect(this->model(), SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
+		        this, SLOT(rowsMoved(QModelIndex,int,int,QModelIndex,int)));
+	}
+}
+
 void TaskTreeView::expandTask(const QModelIndex &index)
 {
 	setExpanded(index, model()->data(index, TaskModel::TaskExpandedRole).toBool());
 
 	for(int i = 0; i < model()->rowCount(index); i++)
 		expandTask(index.child(i, 0));
+}
+
+void TaskTreeView::rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow)
+{
+	qDebug() << "rows moved";
+
+	if ( destinationParent.isValid() )
+		expandTask(destinationParent);
+	else
+		expandTasks();
 }
 
 int TaskTreeView::unSelectedRowBefore(const QModelIndex &index)

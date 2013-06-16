@@ -6,6 +6,8 @@
 class Task;
 class TaskFactory;
 
+class QUndoStack;
+
 class TaskModel : public QAbstractItemModel
 {
 	Q_OBJECT
@@ -38,19 +40,19 @@ class TaskModel : public QAbstractItemModel
 		bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex());
 		bool moveRows(const QModelIndex & sourceParent, int sourceRow, int count, const QModelIndex & destinationParent, int destinationChild);
 
-		Task *root() const;
-		void setRoot(Task *root);
-
-		TaskFactory *taskFactory() const;
-		void setTaskFactory(TaskFactory *factory);
-
-		void tasksAboutToBeReseted();
-		void tasksReseted();
-
+		// mime
 		Qt::DropActions supportedDropActions() const;
 		QStringList mimeTypes() const;
 		QMimeData *mimeData(const QModelIndexList &indexes) const;
 		bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
+
+		Task *root() const;
+
+		void tasksAboutToBeReseted();
+		void tasksReseted();
+
+		bool loadTasklist(const QString &fileName);
+		bool saveTasklist(const QString &fileName);
 
 	public slots:
 		void taskDataChanged(const QList<int> &path);
@@ -62,7 +64,7 @@ class TaskModel : public QAbstractItemModel
 
 		Task *_root;
 
-		TaskFactory *_taskFactory;
+		QUndoStack *_undoStack;
 };
 
 #endif // TASKMODEL_H

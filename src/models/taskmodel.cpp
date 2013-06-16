@@ -1,19 +1,21 @@
 #include "taskmodel.h"
 
 #include "../limbs/task.h"
-#include "../limbs/taskfactory.h"
+#include "../serialization/yamlserialization.h"
 
-#include <QtGui/QFont>
-#include <QtGui/QPalette>
+/*#include <QtGui/QFont>
+#include <QtGui/QPalette>*/
 
-#include <QtCore/QMimeData>0
+#include <QtCore/QMimeData>
+#include <QtCore/QStringList>
 
 #include <QDebug>
 
 TaskModel::TaskModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
-	_root = 0;
+	_root = new Task();
+	_root->setDescription(tr("(root)"));
 }
 
 TaskModel::~TaskModel()
@@ -22,18 +24,7 @@ TaskModel::~TaskModel()
 
 QModelIndex TaskModel::index(int row, int column, const QModelIndex &parent) const
 {
-	if ( !hasIndex(row, column, parent) )
-		return QModelIndex();
-
-	Task *parentTask = getTask(parent);
-
-	if ( !parentTask )
-		return QModelIndex();
-
-	if ( row < parentTask->subtasks().size() )
-		return createIndex(row, column, (void *)parentTask->subtasks().at(row));
-	else
-		return QModelIndex();
+	return createIndex(row, column, (void *)getTask(parent)->subtasks().at(row));
 }
 
 QModelIndex TaskModel::parent(const QModelIndex &index) const
@@ -47,25 +38,13 @@ QModelIndex TaskModel::parent(const QModelIndex &index) const
 	subTask = getTask(index);
 	parentTask = subTask->parent();
 
-	if ( !parentTask )
-		return QModelIndex();
-
-	if ( parentTask == _root )
-		return QModelIndex();
-
-	/*if ( subtask == parent )
-		return QModelIndex();*/
-
-	if ( parentTask->parent() )
-		return createIndex(parentTask->parent()->subtasks().indexOf(parentTask), 0, parentTask);
-	else
-		return createIndex(0, 0, parentTask);
+	return createIndex(parentTask->row(), 0, parentTask);
 }
 
 QVariant TaskModel::data(const QModelIndex &index, int role) const
 {
-	QFont font;
-	QPalette palette;
+	/*QFont font;
+	QPalette palette;*/
 	Task *task;
 
 	if ( !index.isValid() )
@@ -85,7 +64,7 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 				return task->description();
 			break;
 
-		case Qt::ForegroundRole:
+		/*case Qt::ForegroundRole:
 			if ( index.column() == 0 && task->description().isEmpty() )
 				return palette.color(QPalette::Disabled, QPalette::Text);
 			if ( index.column() == 0 && task->isAboveDone() )
@@ -98,7 +77,7 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 				font.setStrikeOut(true);
 				return font;
 			}
-			break;
+			break;*/
 
 		case TaskModel::TaskDescriptionRole:
 			return task->description();
@@ -125,11 +104,9 @@ Qt::ItemFlags TaskModel::flags(const QModelIndex &index) const
 	return Qt::ItemIsEditable
 	     | Qt::ItemIsEnabled
 	     | Qt::ItemIsSelectable
-	     | Qt::ItemIsDragEnabled
-	     | Qt::ItemIsDropEnabled
+	     //| Qt::ItemIsDragEnabled
+	     //| Qt::ItemIsDropEnabled
 	     ;
-
-	//return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
 QVariant TaskModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -148,19 +125,12 @@ QVariant TaskModel::headerData(int section, Qt::Orientation orientation, int rol
 
 int TaskModel::rowCount(const QModelIndex &parent) const
 {
-	Task *parentTask;
-
-	parentTask = getTask(parent);
-
-	return parentTask->subtasks().size();
+	return getTask(parent)->subtasks().size();
 }
 
 int TaskModel::columnCount(const QModelIndex &parent) const
 {
-	if ( getTask(parent) )
-		return 1;//return getItem(parent)->columnCount();
-	else
-		return 0;
+	return 1;
 }
 
 bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -173,60 +143,42 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 	task = getTask(index);
 
-	if ( !task )
-		return false;
-
 	switch ( role )
 	{
 		case Qt::EditRole:
 		case TaskModel::TaskDescriptionRole:
-			//result = item->setData(index.column(), value);
 			task->setDescription(value.toString());
-			result = true;
+			emit dataChanged(index, index, QVector<int>() << Qt::EditRole << TaskModel::TaskDescriptionRole);
+			return true;
 			break;
 
 		case TaskDoneRole:
 			task->setDone(value.toBool());
-			//nextIndex = this->index(index.row() + 1, index.column(), index.parent());
-			result = true;
+			emit dataChanged(index, index, QVector<int>() << TaskModel::TaskDoneRole);
+			return true;
 			break;
 
 		case TaskExpandedRole:
 			task->setExpanded(value.toBool());
-			result = true;
+			emit dataChanged(index, index, QVector<int>() << TaskModel::TaskExpandedRole);
+			return true;
 			break;
-
-		/*case TaskDoneToggleRole:
-			item->setDone(!item->isDone());
-			result = true;
-			break;*/
 
 		default:
-			result = false;
+			return false;
 			break;
 	}
-
-	if ( result )
-		emit dataChanged(index, nextIndex);
-
-	return result;
 }
 
 bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
 	Task *parentTask = getTask(parent);
 
-	if ( !parentTask )
-		return false;
-
-	if ( !taskFactory() )
-		return false;
-
 	bool success = true;
 
 	beginInsertRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-		success &= parentTask->insertSubtask(taskFactory()->create(), position);
+		success &= parentTask->insertSubtask(new Task(), position);
 	endInsertRows();
 
 	return success;
@@ -235,9 +187,6 @@ bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 bool TaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
 	Task *parentTask = getTask(parent);
-
-	if ( !parentTask )
-		return false;
 
 	bool success = true;
 
@@ -282,33 +231,6 @@ Task *TaskModel::root() const
 	return _root;
 }
 
-void TaskModel::setRoot(Task *root)
-{
-	beginResetModel();
-	_root = root;
-	endResetModel();
-}
-
-TaskFactory *TaskModel::taskFactory() const
-{
-	return _taskFactory;
-}
-
-void TaskModel::setTaskFactory(TaskFactory *factory)
-{
-	_taskFactory = factory;
-}
-
-void TaskModel::tasksAboutToBeReseted()
-{
-	emit beginResetModel();
-}
-
-void TaskModel::tasksReseted()
-{
-	emit endResetModel();
-}
-
 Qt::DropActions TaskModel::supportedDropActions() const
 {
 	return Qt::MoveAction;
@@ -316,9 +238,7 @@ Qt::DropActions TaskModel::supportedDropActions() const
 
 QStringList TaskModel::mimeTypes() const
 {
-	QStringList types;
-	types << "text/plain";
-	return types;
+	return QStringList() << "text/plain";
 }
 
 QMimeData *TaskModel::mimeData(const QModelIndexList &indexes) const
@@ -326,7 +246,7 @@ QMimeData *TaskModel::mimeData(const QModelIndexList &indexes) const
 	QMimeData *mimeData = new QMimeData();
 	QByteArray encodedData;
 
-	QDataStream stream(&encodedData, QIODevice::WriteOnly);
+	QDataStream stream(&encodedData, QIODevice::WriteOnly|QIODevice::Text);
 
 	foreach (const QModelIndex &index, indexes)
 	{
@@ -380,8 +300,29 @@ QModelIndex TaskModel::pathToIndex(const QList<int> &path) const
 
 Task *TaskModel::getTask(const QModelIndex &index) const
 {
-	if ( index.isValid() )
-		return static_cast<Task *>(index.internalPointer());
-	else
-		return _root;
+	return ( index.isValid() ) ? static_cast<Task *>(index.internalPointer()) : _root;
+}
+
+
+bool TaskModel::loadTasklist(const QString &fileName)
+{
+	if ( fileName.isEmpty() )
+		return false;
+
+	beginResetModel();
+
+	_root->clear();
+	bool res = YamlSerialization::deserialize(fileName, _root);
+
+	endResetModel();
+
+	return res;
+}
+
+bool TaskModel::saveTasklist(const QString &fileName)
+{
+	if ( fileName.isEmpty() )
+		return false;
+
+	return YamlSerialization::serialize(fileName, _root);
 }

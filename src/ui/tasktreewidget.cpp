@@ -12,15 +12,11 @@
 #include "../models/taskmodel.h"
 #include "../models/tasksortfilterproxymodel.h"
 
-#include "../serialization/jsonserialization.h"
-#include "../serialization/yamlserialization.h"
-
 TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TaskTreeWidget)
 {
 	_modified = false;
-	_saved = false;
 	_title = tr("(untitled)");
 
 	ui->setupUi(this);
@@ -29,25 +25,9 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	connect(_fileWatcher, SIGNAL(fileChanged(QString)),
 	        this, SLOT(taskListFileModified(QString)));
 
-	_rootTask = new Task(0);
-	_rootTask->setDescription(tr("(root)"));
-
-	/*connect(_rootTask, SIGNAL(changed(QList<int>)),
-	        this, SIGNAL(taskListModified()));*/
-
 	_fileName = QString();
 
 	_taskModel = new TaskModel(this);
-	_taskModel->setRoot(_rootTask);
-	_taskModel->setTaskFactory(new TaskFactory(this));
-
-	connect(_rootTask, SIGNAL(dataChanged(QList<int>)),
-	        _taskModel, SLOT(taskDataChanged(QList<int>)));
-
-	connect(_rootTask, SIGNAL(dataChanged(QList<int>)),
-	        this, SLOT(modifyTaskList()));
-	connect(_rootTask, SIGNAL(subtasksChanged()),
-	        this, SLOT(modifyTaskList()));
 
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);
@@ -60,7 +40,6 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	        this, &TaskTreeWidget::showDoneChanged);
 
 	ui->tasksView->setModel(_taskProxyModel);
-	//ui->tasksView->setModel(_taskModel);
 
 	ui->tasksView->setFocus();
 }
@@ -68,11 +47,6 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 TaskTreeWidget::~TaskTreeWidget()
 {
 	delete ui;
-}
-
-Task *TaskTreeWidget::root() const
-{
-	return _rootTask;
 }
 
 QString TaskTreeWidget::fileName() const
@@ -148,25 +122,17 @@ void TaskTreeWidget::keyPressEvent(QKeyEvent *event)
 	event->accept();
 }
 
-bool TaskTreeWidget::open(const QString &fileName)
+bool TaskTreeWidget::load(const QString &fileName)
 {
-	_rootTask->clear();
-
-	if ( fileName.isEmpty() )
+	if ( _taskModel->loadTasklist(fileName) )
+	{
+		setFileName(fileName);
+		ui->tasksView->expandTasks();
+		setModified(false);
+		return true;
+	}
+	else
 		return false;
-
-	_taskModel->tasksAboutToBeReseted();
-	bool res = YamlSerialization::deserialize(fileName, _rootTask);
-	_taskModel->tasksReseted();
-
-	if ( !res )
-		return false;
-
-	setFileName(fileName);
-	ui->tasksView->expandTasks();
-	setModified(false);
-
-	return true;
 }
 
 bool TaskTreeWidget::save(const QString &fileName)
@@ -177,9 +143,7 @@ bool TaskTreeWidget::save(const QString &fileName)
 	if ( _fileWatcher->files().contains(fileName) )
 		_fileWatcher->removePath(fileName);
 
-	_saved = true;
-
-	bool res = YamlSerialization::serialize(fileName, _rootTask);
+	bool res = _taskModel->saveTasklist(fileName);
 
 	_fileWatcher->addPath(fileName);
 
@@ -209,10 +173,7 @@ void TaskTreeWidget::modifyTaskList()
 
 void TaskTreeWidget::taskListFileModified(const QString &fileName)
 {
-	if ( _saved )
-		_saved = false;
-	else
-		open(fileName);
+	load(fileName);
 }
 
 void TaskTreeWidget::setSearchString(const QString &text)

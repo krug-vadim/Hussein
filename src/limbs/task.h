@@ -7,16 +7,13 @@
 class Task;
 typedef QList<Task *> TaskList;
 
-class Task : public QObject
+class Task
 {
-	Q_OBJECT
-
 	public:
-		Task(Task *parent = 0);
+		Task();
 		virtual ~Task();
 
 		Task *parent() const;
-		void setParent(Task *parent);
 
 		const QString &description() const;
 		void setDescription(const QString &description);
@@ -38,17 +35,14 @@ class Task : public QObject
 
 		int row() const;
 
-	signals:
-		void dataChanged(const QList<int> &path);
-		void subtasksChanged();
-
 	private:
-		void changeNotify();
-		void changeNotifyRecursive();
-
+		void setRow(int row);
+		void setParent(Task *parent);
 		void getPath(QList<int> &path);
 
 		Task *_parent;
+
+		int _row;
 
 		QString    _description;
 		bool       _done;

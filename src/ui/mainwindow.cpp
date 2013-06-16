@@ -91,11 +91,14 @@ void MainWindow::openFiles(const QStringList fileNames)
 
 	foreach(const QString &fileName, fileNames)
 	{
+		if ( fileName.isEmpty() )
+			continue;
+
 		QFileInfo fileInfo(fileName);
 
 		TaskTreeWidget *taskTreeWidget = createNewTaskTreeWidget(fileInfo.baseName());
 
-		if ( taskTreeWidget->open(fileName) )
+		if ( taskTreeWidget->load(fileName) )
 			status(tr("Opened %1.").arg(fileName));
 		else
 			status(tr("Failed to open %1.").arg(fileName));
@@ -212,8 +215,6 @@ void MainWindow::closeAllTabs()
 	while ( ui->tabWidget->count() > 0 )
 		closeTab(0);
 }
-
-#include <QDebug>
 
 void MainWindow::taskListModified(QWidget *widget)
 {

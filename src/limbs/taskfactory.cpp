@@ -7,7 +7,7 @@ TaskFactory::TaskFactory(QObject *parent) :
 {
 }
 
-Task *TaskFactory::create(Task *parent)
+Task *TaskFactory::create()
 {
-	return new Task(parent);
+	return new Task();
 }

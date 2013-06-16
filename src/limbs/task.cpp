@@ -1,7 +1,6 @@
 #include "task.h"
 
-Task::Task(Task *parent)
-    : _parent(parent)
+Task::Task()
 {
 	clear();
 }
@@ -18,24 +17,7 @@ Task *Task::parent() const
 
 void Task::setParent(Task *parent)
 {
-	if ( _parent )
-	{
-		disconnect(this, SIGNAL(subtasksChanged()),
-		           _parent, SIGNAL(subtasksChanged()));
-		disconnect(this, SIGNAL(dataChanged(QList<int>)),
-		           _parent, SIGNAL(dataChanged(QList<int>)));
-	}
-
 	_parent = parent;
-
-	if ( _parent )
-	{
-		connect(this, SIGNAL(dataChanged(QList<int>)),
-		        _parent, SIGNAL(dataChanged(QList<int>)));
-		connect(this, SIGNAL(subtasksChanged()),
-		        _parent, SIGNAL(subtasksChanged()));
-
-	}
 }
 
 const QString &Task::description() const
@@ -46,7 +28,6 @@ const QString &Task::description() const
 void Task::setDescription(const QString &description)
 {
 	_description = description;
-	changeNotify();
 }
 
 bool Task::isDone() const
@@ -75,7 +56,6 @@ void Task::setDone(const bool done)
 		return;
 
 	_done = done;
-	changeNotifyRecursive();
 }
 
 bool Task::isExpanded() const
@@ -89,13 +69,18 @@ void Task::setExpanded(const bool expanded)
 		return;
 
 	_expanded = expanded;
-	changeNotify();
 }
 
 void Task::clear()
 {
+	_parent = 0;
+	_row = -1;
+
 	_done = false;
 	_expanded = true;
+
+	foreach(Task *subtask, subtasks())
+		subtask->clear();
 
 	qDeleteAll(_subtasks);
 	_subtasks.clear();
@@ -112,9 +97,8 @@ bool Task::appendSubtask(Task *task)
 		return false;
 
 	task->setParent(this);
+	task->setRow(_subtasks.size());
 	_subtasks.append(task);
-
-	emit subtasksChanged();
 
 	return true;
 }
@@ -128,9 +112,8 @@ bool Task::insertSubtask(Task *task, int position)
 		return false;
 
 	task->setParent(this);
+	task->setRow(position);
 	_subtasks.insert(position, task);
-
-	emit subtasksChanged();
 
 	return true;
 }
@@ -141,19 +124,20 @@ bool Task::removeSubtask(int position)
 		return false;
 
 	_subtasks.at(position)->setParent(0);
+	_subtasks.at(position)->setRow(-1);
 	_subtasks.removeAt(position);
-
-	emit subtasksChanged();
 
 	return true;
 }
 
 int Task::row() const
 {
-	if ( !parent() )
-		return -1;
+	return _row;
+}
 
-	return parent()->subtasks().indexOf( const_cast<Task *>(this) );
+void Task::setRow(int row)
+{
+	_row = row;
 }
 
 void Task::getPath(QList<int> &path)
@@ -162,21 +146,4 @@ void Task::getPath(QList<int> &path)
 
 	for(Task *current = this; current->row() != -1; current = current->parent())
 		path.append(current->row());
-}
-
-void Task::changeNotify()
-{
-	QList<int> path;
-
-	getPath(path);
-
-	emit dataChanged(path);
-}
-
-void Task::changeNotifyRecursive()
-{
-	changeNotify();
-
-	foreach(Task *subtask, subtasks())
-		subtask->changeNotifyRecursive();
 }

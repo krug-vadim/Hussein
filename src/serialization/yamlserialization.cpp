@@ -52,12 +52,21 @@ bool YamlSerialization::serialize(const QString &fileName, Task *root)
 		return false;
 }
 
+#include <QDebug>
+
+#include <QDateTime>
+
 void YamlSerialization::deserialize(const QByteArray &yaml, Task *root)
 {
+	qDebug() << QDateTime::currentDateTime() << "loaded done, parsing";
 	YAML::Node node = YAML::Load(yaml.constData());
+	qDebug() << QDateTime::currentDateTime() << "parsed, creating items";
 
 	deserializeRoot(node, root);
+
+	qDebug() << QDateTime::currentDateTime() <<  "items created" << root->subtasks().size();
 }
+
 
 bool YamlSerialization::deserialize(const QString &fileName, Task *root)
 {
@@ -65,7 +74,9 @@ bool YamlSerialization::deserialize(const QString &fileName, Task *root)
 
 	if ( file.open(QIODevice::ReadOnly|QIODevice::Text) )
 	{
+		qDebug() << "deserializing";
 		YamlSerialization::deserialize(file.readAll(), root);
+		qDebug() << "stop deserializing";
 		file.close();
 		return true;
 	}

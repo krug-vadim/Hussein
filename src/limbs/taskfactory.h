@@ -12,7 +12,7 @@ class TaskFactory : public QObject
 	public:
 		explicit TaskFactory(QObject *parent = 0);
 
-		Task *create(Task *parent = 0);
+		Task *create();
 };
 
 #endif // TASKFACTORY_H
