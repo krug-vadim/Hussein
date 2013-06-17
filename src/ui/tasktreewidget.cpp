@@ -28,6 +28,8 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_fileName = QString();
 
 	_taskModel = new TaskModel(this);
+	/*connect(_taskModel, SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
+	        ui->tasksView, SLOT(expandTasks()));*/
 
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);

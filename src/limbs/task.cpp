@@ -1,5 +1,7 @@
 #include "task.h"
 
+#include <QDebug>
+
 Task::Task()
 {
 	clear();
@@ -74,13 +76,9 @@ void Task::setExpanded(const bool expanded)
 void Task::clear()
 {
 	_parent = 0;
-	_row = -1;
 
 	_done = false;
 	_expanded = true;
-
-	foreach(Task *subtask, subtasks())
-		subtask->clear();
 
 	qDeleteAll(_subtasks);
 	_subtasks.clear();
@@ -97,7 +95,6 @@ bool Task::appendSubtask(Task *task)
 		return false;
 
 	task->setParent(this);
-	task->setRow(_subtasks.size());
 	_subtasks.append(task);
 
 	return true;
@@ -105,14 +102,17 @@ bool Task::appendSubtask(Task *task)
 
 bool Task::insertSubtask(Task *task, int position)
 {
+	qDebug() << "inserting in" << description() << "at" << position;
+
 	if ( position < 0 || position > subtasks().size() )
 		return false;
 
 	if ( !task )
 		return false;
 
+	qDebug() << "task descr:" << task->description();
+
 	task->setParent(this);
-	task->setRow(position);
 	_subtasks.insert(position, task);
 
 	return true;
@@ -124,7 +124,6 @@ bool Task::removeSubtask(int position)
 		return false;
 
 	_subtasks.at(position)->setParent(0);
-	_subtasks.at(position)->setRow(-1);
 	_subtasks.removeAt(position);
 
 	return true;
@@ -132,12 +131,10 @@ bool Task::removeSubtask(int position)
 
 int Task::row() const
 {
-	return _row;
-}
+	if ( !parent() )
+		return -1;
 
-void Task::setRow(int row)
-{
-	_row = row;
+	return parent()->subtasks().indexOf( const_cast<Task *>(this) );
 }
 
 void Task::getPath(QList<int> &path)

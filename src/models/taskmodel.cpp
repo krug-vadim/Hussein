@@ -24,7 +24,10 @@ TaskModel::~TaskModel()
 
 QModelIndex TaskModel::index(int row, int column, const QModelIndex &parent) const
 {
-	return createIndex(row, column, (void *)getTask(parent)->subtasks().at(row));
+	if ( !hasIndex(row, column, parent) )
+		return QModelIndex();
+
+	return createIndex(row, column, getTask(parent)->subtasks().at(row));
 }
 
 QModelIndex TaskModel::parent(const QModelIndex &index) const
@@ -32,13 +35,16 @@ QModelIndex TaskModel::parent(const QModelIndex &index) const
 	if (!index.isValid())
 		return QModelIndex();
 
-	Task *subTask;
-	Task *parentTask;
+	Task *task = getTask(index);
+	Task *parent = task->parent();
 
-	subTask = getTask(index);
-	parentTask = subTask->parent();
+	if ( parent == _root )
+		return QModelIndex();
 
-	return createIndex(parentTask->row(), 0, parentTask);
+	if ( task->row() == -1 )
+		return QModelIndex();
+
+	return createIndex(parent->row(), 0, parent);
 }
 
 QVariant TaskModel::data(const QModelIndex &index, int role) const
@@ -302,7 +308,6 @@ Task *TaskModel::getTask(const QModelIndex &index) const
 {
 	return ( index.isValid() ) ? static_cast<Task *>(index.internalPointer()) : _root;
 }
-
 
 bool TaskModel::loadTasklist(const QString &fileName)
 {

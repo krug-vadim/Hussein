@@ -134,25 +134,33 @@ void TaskTreeView::setModel(QAbstractItemModel *model)
 {
 	if ( this->model() )
 	{
-		disconnect(this->model(), SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
-		           this, SLOT(rowsMoved(QModelIndex,int,int,QModelIndex,int)));
+		disconnect(this->model(), SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),
+		           this, SLOT(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)));
 	}
 
 	QTreeView::setModel(model);
 
 	if ( this->model() )
 	{
-		connect(this->model(), SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
-		        this, SLOT(rowsMoved(QModelIndex,int,int,QModelIndex,int)));
+		connect(this->model(), SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),
+		        this, SLOT(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)));
 	}
 }
 
 void TaskTreeView::expandTask(const QModelIndex &index)
 {
+	if ( !index.isValid() )
+		return;
+
 	setExpanded(index, model()->data(index, TaskModel::TaskExpandedRole).toBool());
 
 	for(int i = 0; i < model()->rowCount(index); i++)
 		expandTask(index.child(i, 0));
+}
+
+void TaskTreeView::layoutChanged(const QList<QPersistentModelIndex> &parents, QAbstractItemModel::LayoutChangeHint hint)
+{
+	expandTasks();
 }
 
 int TaskTreeView::unSelectedRowBefore(const QModelIndex &index)

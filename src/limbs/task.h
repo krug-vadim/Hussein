@@ -36,13 +36,10 @@ class Task
 		int row() const;
 
 	private:
-		void setRow(int row);
 		void setParent(Task *parent);
 		void getPath(QList<int> &path);
 
 		Task *_parent;
-
-		int _row;
 
 		QString    _description;
 		bool       _done;
