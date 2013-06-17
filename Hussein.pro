@@ -14,7 +14,9 @@ SOURCES += \
     src/models/tasksortfilterproxymodel.cpp \
     src/limbs/task.cpp \
     src/serialization/yamlserialization.cpp \
-    src/ui/tasktabwidget.cpp
+    src/ui/tasktabwidget.cpp \
+    src/limbs/taskmimedata.cpp \
+    src/models/guitaskmodel.cpp
 
 HEADERS  += \
     src/models/taskmodel.h \
@@ -26,7 +28,9 @@ HEADERS  += \
     src/models/tasksortfilterproxymodel.h \
     src/limbs/task.h \
     src/serialization/yamlserialization.h \
-    src/ui/tasktabwidget.h
+    src/ui/tasktabwidget.h \
+    src/limbs/taskmimedata.h \
+    src/models/guitaskmodel.h
 
 FORMS    += \
     src/ui/mainwindow.ui \

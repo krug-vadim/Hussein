@@ -114,26 +114,6 @@ void TaskTreeView::paintEvent(QPaintEvent *event)
 		QTreeView::paintEvent(event);
 }
 
-void TaskTreeView::dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
-{
-	qDebug() << "dataChanged";
-	QTreeView::dataChanged(topLeft, bottomRight, roles);
-	//expandTasks();
-}
-
-//
-
-void TaskTreeView::rowsInserted(const QModelIndex &parent, int start, int end)
-{
-	qDebug() << "rowsInserted";
-	QTreeView::rowsInserted(parent, start, end);
-	//expandTasks();
-	if ( parent.isValid() )
-		expandTask(parent);
-	else
-		expandTasks();
-}
-
 void TaskTreeView::taskCollapsed(const QModelIndex &index)
 {
 	model()->setData(index, false, TaskModel::TaskExpandedRole);
@@ -173,16 +153,6 @@ void TaskTreeView::expandTask(const QModelIndex &index)
 
 	for(int i = 0; i < model()->rowCount(index); i++)
 		expandTask(index.child(i, 0));
-}
-
-void TaskTreeView::rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow)
-{
-	qDebug() << "rows moved";
-
-	if ( destinationParent.isValid() )
-		expandTask(destinationParent);
-	else
-		expandTasks();
 }
 
 int TaskTreeView::unSelectedRowBefore(const QModelIndex &index)

@@ -20,16 +20,11 @@ class TaskTreeView : public QTreeView
 		virtual void keyPressEvent(QKeyEvent *event);
 		virtual void paintEvent(QPaintEvent *event);
 
-		virtual void dataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int> ());
-		virtual void rowsInserted(const QModelIndex & parent, int start, int end);
-
 	private slots:
 		void taskCollapsed(const QModelIndex &index);
 		void taskExpanded(const QModelIndex &index);
 
 		void expandTask(const QModelIndex &index);
-
-		void rowsMoved(const QModelIndex &sourceParent, int sourceStart, int sourceEnd, const QModelIndex &destinationParent, int destinationRow);
 
 	private:
 		int unSelectedRowBefore(const QModelIndex &index);
