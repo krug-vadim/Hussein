@@ -1,5 +1,6 @@
 #include "tasksortfilterproxymodel.h"
 
+#include "../limbs/task.h"
 #include "taskmodel.h"
 
 #include <QDebug>
@@ -63,8 +64,8 @@ bool TaskSortFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex
 {
 	QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
 
-	bool taskDone = sourceModel()->data(index, TaskModel::TaskDoneRole).toBool();
-	QString taskDescription = sourceModel()->data(index, TaskModel::TaskDescriptionRole).toString();
+	bool taskDone = sourceModel()->data(index, Task::TaskDoneRole).toBool();
+	QString taskDescription = sourceModel()->data(index, Task::TaskDescriptionRole).toString();
 
 	if ( !showDone() && taskDone )
 		return false;

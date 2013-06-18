@@ -3,6 +3,8 @@
 
 #include "taskmodel.h"
 
+class QUndoStack;
+
 class GuiTaskModel : public TaskModel
 {
 	Q_OBJECT
@@ -11,6 +13,9 @@ class GuiTaskModel : public TaskModel
 		explicit GuiTaskModel(QObject *parent = 0);
 
 		QVariant data(const QModelIndex &index, int role) const;
+
+	private:
+		QUndoStack *undoStack;
 };
 
 #endif // GUITASKMODEL_H

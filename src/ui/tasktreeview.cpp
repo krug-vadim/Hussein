@@ -5,7 +5,7 @@
 #include <QtGui/QPalette>
 #include <QtGui/QFont>
 
-#include "../models/taskmodel.h"
+#include "../limbs/task.h"
 
 #include <QDebug>
 
@@ -116,12 +116,12 @@ void TaskTreeView::paintEvent(QPaintEvent *event)
 
 void TaskTreeView::taskCollapsed(const QModelIndex &index)
 {
-	model()->setData(index, false, TaskModel::TaskExpandedRole);
+	model()->setData(index, false, Task::TaskExpandRole);
 }
 
 void TaskTreeView::taskExpanded(const QModelIndex &index)
 {
-	model()->setData(index, true, TaskModel::TaskExpandedRole);
+	model()->setData(index, true, Task::TaskExpandRole);
 }
 
 void TaskTreeView::expandTasks()
@@ -152,7 +152,7 @@ void TaskTreeView::expandTask(const QModelIndex &index)
 	if ( !index.isValid() )
 		return;
 
-	setExpanded(index, model()->data(index, TaskModel::TaskExpandedRole).toBool());
+	setExpanded(index, model()->data(index, Task::TaskExpandRole).toBool());
 
 	for(int i = 0; i < model()->rowCount(index); i++)
 		expandTask(index.child(i, 0));
@@ -392,6 +392,6 @@ void TaskTreeView::toggleTaskDone()
 		if ( !i.isValid() )
 			return;
 
-		model()->setData(i, !model()->data(i, TaskModel::TaskDoneRole).toBool(), TaskModel::TaskDoneRole);
+		model()->setData(i, !model()->data(i, Task::TaskDoneRole).toBool(), Task::TaskDoneRole);
 	}
 }

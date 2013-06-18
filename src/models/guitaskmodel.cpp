@@ -3,6 +3,8 @@
 #include <QtGui/QFont>
 #include <QtGui/QPalette>
 
+#include <QtWidgets/QUndoStack>
+
 #include "../limbs/task.h"
 
 GuiTaskModel::GuiTaskModel(QObject *parent) :

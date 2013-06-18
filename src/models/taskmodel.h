@@ -2,25 +2,13 @@
 #define TASKMODEL_H
 
 #include <QtCore/QAbstractItemModel>
-
-class Task;
-class TaskFactory;
-
-class QUndoStack;
+#include "../limbs/task.h"
 
 class TaskModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 	public:
-		enum
-		{
-			TaskDoneRole = Qt::UserRole,
-			TaskExpandedRole,
-			TaskDescriptionRole,
-		}
-		TaskDataRole;
-
 		explicit TaskModel(QObject *parent = 0);
 		~TaskModel();
 
@@ -46,7 +34,7 @@ class TaskModel : public QAbstractItemModel
 		QMimeData *mimeData(const QModelIndexList &indexes) const;
 		bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
-		Task *root() const;
+		TaskSharedPointer root() const;
 
 		void tasksAboutToBeReseted();
 		void tasksReseted();
@@ -60,11 +48,9 @@ class TaskModel : public QAbstractItemModel
 	private:
 		QModelIndex pathToIndex(const QList<int> &path) const;
 
-		Task *getTask(const QModelIndex &index) const;
+		TaskSharedPointer getTask(const QModelIndex &index) const;
 
-		Task *_root;
-
-		QUndoStack *_undoStack;
+		TaskSharedPointer _root;
 };
 
 #endif // TASKMODEL_H

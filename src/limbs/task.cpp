@@ -12,12 +12,12 @@ Task::~Task()
 	clear();
 }
 
-Task *Task::parent() const
+TaskSharedPointer Task::parent() const
 {
 	return _parent;
 }
 
-void Task::setParent(Task *parent)
+void Task::setParent(const TaskSharedPointer &parent)
 {
 	_parent = parent;
 }
@@ -42,11 +42,13 @@ bool Task::isAboveDone() const
 	if ( isDone() )
 		return true;
 
-	const Task *p = static_cast<const Task *>(this);
-	while ( (p = p->parent()) )
+	TaskSharedPointer p = parent();
+
+	while ( !p.isNull() )
 	{
 		if ( p->isDone() )
 			return true;
+		p = p->parent();
 	}
 
 	return false;
@@ -75,8 +77,6 @@ void Task::setExpanded(const bool expanded)
 
 void Task::clear()
 {
-	_parent = 0;
-
 	_done = false;
 	_expanded = true;
 
@@ -89,7 +89,7 @@ const TaskList &Task::subtasks() const
 	return _subtasks;
 }
 
-bool Task::appendSubtask(Task *task)
+bool Task::appendSubtask(const TaskSharedPointer &task)
 {
 	if ( !task )
 		return false;
@@ -100,7 +100,7 @@ bool Task::appendSubtask(Task *task)
 	return true;
 }
 
-bool Task::insertSubtask(Task *task, int position)
+bool Task::insertSubtask(const TaskSharedPointer &task, int position)
 {
 	if ( position < 0 || position > subtasks().size() )
 		return false;
@@ -139,4 +139,48 @@ void Task::getPath(QList<int> &path)
 
 	for(Task *current = this; current->row() != -1; current = current->parent())
 		path.append(current->row());
+}
+
+QVariant Task::data(int role) const
+{
+	switch ( role )
+	{
+		case TaskDescriptionRole:
+			return description();
+			break;
+
+		case TaskDoneRole:
+			return isDone();
+			break;
+
+		case TaskExpandRole:
+			return isExpanded();
+			break;
+	}
+
+	return QVariant();
+}
+
+bool Task::setData(const QVariant &value, int role)
+{
+	switch ( role )
+	{
+		case TaskDescriptionRole:
+			setDescription(value.toString());
+			break;
+
+		case TaskDoneRole:
+			setDone(value.toBool());
+			break;
+
+		case TaskExpandRole:
+			setExpanded(value.toBool());
+			break;
+
+		default:
+			return false;
+			break;
+	}
+
+	return true;
 }

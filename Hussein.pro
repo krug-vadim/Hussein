@@ -9,26 +9,26 @@ SOURCES += \
     src/ui/mainwindow.cpp \
     src/ui/tasktreewidget.cpp \
     src/ui/tasktreeview.cpp \
-    src/serialization/jsonserialization.cpp \
     src/models/tasksortfilterproxymodel.cpp \
     src/limbs/task.cpp \
     src/serialization/yamlserialization.cpp \
     src/ui/tasktabwidget.cpp \
     src/limbs/taskmimedata.cpp \
-    src/models/guitaskmodel.cpp
+    src/models/guitaskmodel.cpp \
+    src/models/commands/changevaluecommand.cpp
 
 HEADERS  += \
     src/models/taskmodel.h \
     src/ui/mainwindow.h \
     src/ui/tasktreewidget.h \
     src/ui/tasktreeview.h \
-    src/serialization/jsonserialization.h \
     src/models/tasksortfilterproxymodel.h \
     src/limbs/task.h \
     src/serialization/yamlserialization.h \
     src/ui/tasktabwidget.h \
     src/limbs/taskmimedata.h \
-    src/models/guitaskmodel.h
+    src/models/guitaskmodel.h \
+    src/models/commands/changevaluecommand.h
 
 FORMS    += \
     src/ui/mainwindow.ui \
