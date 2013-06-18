@@ -8,8 +8,7 @@
 #include <QtGui/QKeyEvent>
 
 #include "../limbs/task.h"
-#include "../limbs/taskfactory.h"
-#include "../models/taskmodel.h"
+#include "../models/guitaskmodel.h"
 #include "../models/tasksortfilterproxymodel.h"
 
 TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
@@ -27,7 +26,7 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 
 	_fileName = QString();
 
-	_taskModel = new TaskModel(this);
+	_taskModel = new GuiTaskModel(this);
 	/*connect(_taskModel, SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
 	        ui->tasksView, SLOT(expandTasks()));*/
 

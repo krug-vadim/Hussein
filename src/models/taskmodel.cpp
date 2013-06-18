@@ -3,9 +3,6 @@
 #include "../limbs/task.h"
 #include "../serialization/yamlserialization.h"
 
-/*#include <QtGui/QFont>
-#include <QtGui/QPalette>*/
-
 #include <QtCore/QMimeData>
 #include <QtCore/QStringList>
 
@@ -49,8 +46,6 @@ QModelIndex TaskModel::parent(const QModelIndex &index) const
 
 QVariant TaskModel::data(const QModelIndex &index, int role) const
 {
-	/*QFont font;
-	QPalette palette;*/
 	Task *task;
 
 	if ( !index.isValid() )
@@ -69,21 +64,6 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 			if ( index.column() == 0 )
 				return task->description();
 			break;
-
-		/*case Qt::ForegroundRole:
-			if ( index.column() == 0 && task->description().isEmpty() )
-				return palette.color(QPalette::Disabled, QPalette::Text);
-			if ( index.column() == 0 && task->isAboveDone() )
-				return palette.color(QPalette::Disabled, QPalette::Text);
-			break;
-
-		case Qt::FontRole:
-			if ( index.column() == 0 && task->isDone())
-			{
-				font.setStrikeOut(true);
-				return font;
-			}
-			break;*/
 
 		case TaskModel::TaskDescriptionRole:
 			return task->description();
@@ -136,16 +116,13 @@ int TaskModel::rowCount(const QModelIndex &parent) const
 
 int TaskModel::columnCount(const QModelIndex &parent) const
 {
+	Q_UNUSED(parent);
 	return 1;
 }
 
 bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	bool result;
-	QModelIndex nextIndex;
 	Task *task;
-
-	nextIndex = index;
 
 	task = getTask(index);
 

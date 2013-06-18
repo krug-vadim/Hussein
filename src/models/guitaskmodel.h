@@ -10,10 +10,7 @@ class GuiTaskModel : public TaskModel
 	public:
 		explicit GuiTaskModel(QObject *parent = 0);
 
-	signals:
-
-	public slots:
-
+		QVariant data(const QModelIndex &index, int role) const;
 };
 
 #endif // GUITASKMODEL_H

@@ -102,15 +102,11 @@ bool Task::appendSubtask(Task *task)
 
 bool Task::insertSubtask(Task *task, int position)
 {
-	qDebug() << "inserting in" << description() << "at" << position;
-
 	if ( position < 0 || position > subtasks().size() )
 		return false;
 
 	if ( !task )
 		return false;
-
-	qDebug() << "task descr:" << task->description();
 
 	task->setParent(this);
 	_subtasks.insert(position, task);
