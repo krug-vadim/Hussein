@@ -5,7 +5,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QVariant>
 
-class Task;
+#include "../limbs/task.h"
 
 namespace YAML
 {
@@ -18,11 +18,11 @@ class YamlSerialization
 	public:
 		YamlSerialization();
 
-		static QByteArray serialize(Task *root);
-		static bool serialize(const QString &fileName, Task *root);
+		static QByteArray serialize(TaskSharedPointer root);
+		static bool serialize(const QString &fileName, TaskSharedPointer root);
 
-		static void deserialize(const QByteArray &yaml, Task *root);
-		static bool deserialize(const QString &fileName, Task *root);
+		static void deserialize(const QByteArray &yaml, TaskSharedPointer root);
+		static bool deserialize(const QString &fileName, TaskSharedPointer root);
 
 		static QByteArray serializeSettings(const QVariantHash &settings);
 		static bool serializeSettings(const QString &fileName, const QVariantHash &settings);
@@ -31,9 +31,9 @@ class YamlSerialization
 		static bool deserializeSettings(const QString &fileName, QVariantHash &settings);
 
 	private:
-		static void serializeTask(YAML::Emitter &out, Task *task);
-		static void deserializeRoot(const YAML::Node &node, Task *root);
-		static Task *deserializeTask(const YAML::Node &node);
+		static void serializeTask(YAML::Emitter &out, TaskSharedPointer task);
+		static void deserializeRoot(const YAML::Node &node, TaskSharedPointer root);
+		static TaskSharedPointer deserializeTask(const YAML::Node &node);
 
 		static void deserializeSettingsToHash(const YAML::Node &node, QVariantHash &settings);
 };

@@ -9,15 +9,16 @@ Task::Task()
 
 Task::~Task()
 {
+	qDebug() << "task" << description() << "deleted";
 	clear();
 }
 
-TaskSharedPointer Task::parent() const
+TaskWeakPointer Task::parent() const
 {
 	return _parent;
 }
 
-void Task::setParent(const TaskSharedPointer &parent)
+void Task::setParent(const TaskWeakPointer &parent)
 {
 	_parent = parent;
 }
@@ -80,8 +81,8 @@ void Task::clear()
 	_done = false;
 	_expanded = true;
 
-	qDeleteAll(_subtasks);
-	_subtasks.clear();
+	while( !_subtasks.isEmpty() )
+		_subtasks.takeFirst().clear();
 }
 
 const TaskList &Task::subtasks() const
@@ -91,10 +92,9 @@ const TaskList &Task::subtasks() const
 
 bool Task::appendSubtask(const TaskSharedPointer &task)
 {
-	if ( !task )
+	if ( task.isNull() )
 		return false;
 
-	task->setParent(this);
 	_subtasks.append(task);
 
 	return true;
@@ -105,10 +105,9 @@ bool Task::insertSubtask(const TaskSharedPointer &task, int position)
 	if ( position < 0 || position > subtasks().size() )
 		return false;
 
-	if ( !task )
+	if ( task.isNull() )
 		return false;
 
-	task->setParent(this);
 	_subtasks.insert(position, task);
 
 	return true;
@@ -119,27 +118,18 @@ bool Task::removeSubtask(int position)
 	if ( position < 0 || position > subtasks().size() )
 		return false;
 
-	_subtasks.at(position)->setParent(0);
 	_subtasks.removeAt(position);
 
 	return true;
 }
 
-int Task::row() const
-{
-	if ( !parent() )
-		return -1;
-
-	return parent()->subtasks().indexOf( const_cast<Task *>(this) );
-}
-
-void Task::getPath(QList<int> &path)
+/*void Task::getPath(QList<int> &path)
 {
 	path.clear();
 
 	for(Task *current = this; current->row() != -1; current = current->parent())
 		path.append(current->row());
-}
+}*/
 
 QVariant Task::data(int role) const
 {

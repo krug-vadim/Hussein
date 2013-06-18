@@ -16,12 +16,12 @@ QVariant GuiTaskModel::data(const QModelIndex &index, int role) const
 {
 	QFont font;
 	QPalette palette;
-	Task *task;
+	TaskSharedPointer task;
 
 	if ( !index.isValid() )
 		return QVariant();
 
-	task = static_cast<Task *>(index.internalPointer());
+	task = getTask(index);
 
 	switch ( role )
 	{

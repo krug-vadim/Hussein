@@ -1,6 +1,6 @@
 #include "changevaluecommand.h"
 
-#include <QtCOre/QAbstractItemModel>
+#include <QtCore/QAbstractItemModel>
 
 ChangeValueCommand::ChangeValueCommand(const QModelIndex &index, const QVariant &value, const int role, QAbstractItemModel *model)
     : QUndoCommand()

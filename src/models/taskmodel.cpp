@@ -10,7 +10,8 @@
 TaskModel::TaskModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
-	_root = TaskSharedPointer(new Task() );
+	_root = TaskSharedPointer(new Task());
+	_root->setParent(TaskSharedPointer());
 	_root->setDescription(tr("(root)"));
 }
 
@@ -28,29 +29,34 @@ QModelIndex TaskModel::index(int row, int column, const QModelIndex &parent) con
 
 QModelIndex TaskModel::parent(const QModelIndex &index) const
 {
-	if (!index.isValid())
+	if ( !index.isValid() )
 		return QModelIndex();
 
-	TaskSharedPointer task = getTask(index);
-	TaskSharedPointer parent = task->parent();
+	TaskWeakPointer parent = getTask(index)->parent();
+
+	if ( parent.isNull() )
+		return QModelIndex();
 
 	if ( parent == _root )
 		return QModelIndex();
 
-	if ( task->row() == -1 )
+	TaskWeakPointer grandParent = parent.toStrongRef()->parent();
+	int parentRow = grandParent.toStrongRef()->subtasks().indexOf(parent);
+
+	if ( parentRow == - 1 )
 		return QModelIndex();
 
-	return createIndex(parent->row(), 0, (void*)&parent);
+	return createIndex(parentRow, 0, (void *)&grandParent.toStrongRef()->subtasks().at(parentRow));
 }
 
 QVariant TaskModel::data(const QModelIndex &index, int role) const
 {
-	Task *task;
+	TaskSharedPointer task;
 
 	if ( !index.isValid() )
 		return QVariant();
 
-	task = static_cast<Task *>(index.internalPointer());
+	task = getTask(index);
 
 	switch ( role )
 	{
@@ -125,13 +131,18 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 
 bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
-	TaskSharedPointer parentTask = getTask(parent);
-
 	bool success = true;
+
+	TaskSharedPointer parentTask = getTask(parent);
 
 	beginInsertRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-		success &= parentTask->insertSubtask(TaskSharedPointer(new Task()), position);
+	{
+		TaskSharedPointer task(new Task());
+
+		task->setParent(parentTask);
+		success &= parentTask->insertSubtask(task, position);
+	}
 	endInsertRows();
 
 	return success;
@@ -145,7 +156,14 @@ bool TaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 
 	beginRemoveRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
+	{
+		TaskSharedPointer current;
+
+		current  = parentTask->subtasks().at(position);
 		success &= parentTask->removeSubtask(position);
+
+		current.clear();
+	}
 	endRemoveRows();
 
 	return success;
@@ -171,6 +189,7 @@ bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int cou
 		current = fromTask->subtasks().at(sourceRow);
 		fromTask->removeSubtask(sourceRow);
 
+		current->setParent(toTask);
 		success &= toTask->insertSubtask(current, destinationChild);
 	}
 
@@ -179,7 +198,7 @@ bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int cou
 	return success;
 }
 
-TaskSharedPointer TaskModel::root() const
+const TaskSharedPointer &TaskModel::root() const
 {
 	return _root;
 }
@@ -264,7 +283,7 @@ bool TaskModel::loadTasklist(const QString &fileName)
 	beginResetModel();
 
 	_root->clear();
-	bool res = YamlSerialization::deserialize(fileName, _root.data());
+	bool res = YamlSerialization::deserialize(fileName, _root);
 
 	endResetModel();
 
@@ -276,5 +295,5 @@ bool TaskModel::saveTasklist(const QString &fileName)
 	if ( fileName.isEmpty() )
 		return false;
 
-	return YamlSerialization::serialize(fileName, _root.data());
+	return YamlSerialization::serialize(fileName, _root);
 }

@@ -15,7 +15,7 @@ YamlSerialization::YamlSerialization()
 {
 }
 
-QByteArray YamlSerialization::serialize(Task *root)
+QByteArray YamlSerialization::serialize(TaskSharedPointer root)
 {
 	YAML::Emitter out;
 
@@ -26,7 +26,7 @@ QByteArray YamlSerialization::serialize(Task *root)
 		out << YAML::Key << "tasks";
 		out << YAML::Value << YAML::BeginSeq;
 
-		foreach(Task *subTask, root->subtasks())
+		foreach(TaskSharedPointer subTask, root->subtasks())
 			serializeTask(out, subTask);
 
 		out << YAML::EndSeq;
@@ -37,7 +37,7 @@ QByteArray YamlSerialization::serialize(Task *root)
 	return QByteArray(out.c_str());
 }
 
-bool YamlSerialization::serialize(const QString &fileName, Task *root)
+bool YamlSerialization::serialize(const QString &fileName, TaskSharedPointer root)
 {
 	QFile file(fileName);
 
@@ -56,7 +56,7 @@ bool YamlSerialization::serialize(const QString &fileName, Task *root)
 
 #include <QDateTime>
 
-void YamlSerialization::deserialize(const QByteArray &yaml, Task *root)
+void YamlSerialization::deserialize(const QByteArray &yaml, TaskSharedPointer root)
 {
 	qDebug() << QDateTime::currentDateTime() << "loaded done, parsing";
 	YAML::Node node = YAML::Load(yaml.constData());
@@ -68,7 +68,7 @@ void YamlSerialization::deserialize(const QByteArray &yaml, Task *root)
 }
 
 
-bool YamlSerialization::deserialize(const QString &fileName, Task *root)
+bool YamlSerialization::deserialize(const QString &fileName, TaskSharedPointer root)
 {
 	QFile file(fileName);
 
@@ -175,7 +175,7 @@ bool YamlSerialization::deserializeSettings(const QString &fileName, QVariantHas
 	return true;
 }
 
-void YamlSerialization::serializeTask(YAML::Emitter &out, Task *task)
+void YamlSerialization::serializeTask(YAML::Emitter &out, TaskSharedPointer task)
 {
 	out << YAML::BeginMap;
 
@@ -193,7 +193,7 @@ void YamlSerialization::serializeTask(YAML::Emitter &out, Task *task)
 		out << YAML::Key << "tasks";
 		out << YAML::Value << YAML::BeginSeq;
 
-		foreach(Task *subTask, task->subtasks())
+		foreach(TaskSharedPointer subTask, task->subtasks())
 			serializeTask(out, subTask);
 
 		out << YAML::EndSeq;
@@ -202,7 +202,7 @@ void YamlSerialization::serializeTask(YAML::Emitter &out, Task *task)
 	out << YAML::EndMap;
 }
 
-void YamlSerialization::deserializeRoot(const YAML::Node &node, Task *root)
+void YamlSerialization::deserializeRoot(const YAML::Node &node, TaskSharedPointer root)
 {
 	if ( node.IsNull() )
 		return;
@@ -221,25 +221,33 @@ void YamlSerialization::deserializeRoot(const YAML::Node &node, Task *root)
 			return;
 
 		foreach(YAML::Node node, tasks)
-			root->appendSubtask(deserializeTask(node));
+		{
+			TaskSharedPointer task = deserializeTask(node);
+			task->setParent(root);
+			root->appendSubtask(task);
+		}
 	}
 
 	if ( node.IsSequence() )
 	{
-		foreach(YAML::Node task, node)
-			root->appendSubtask(deserializeTask(task));
+		foreach(YAML::Node subNode, node)
+		{
+			TaskSharedPointer task = deserializeTask(subNode);
+			task->setParent(root);
+			root->appendSubtask(task);
+		}
 	}
 }
 
-Task *YamlSerialization::deserializeTask(const YAML::Node &node)
+TaskSharedPointer YamlSerialization::deserializeTask(const YAML::Node &node)
 {
 	if ( node.IsNull() )
-		return 0;
+		return TaskSharedPointer();
 
 	if ( !node.IsMap() )
-		return 0;
+		return TaskSharedPointer();
 
-	Task *task = new Task();
+	TaskSharedPointer task(new Task());
 
 	if ( node["description"] )
 		task->setDescription( QString::fromStdString(node["description"].as<std::string>()) );
@@ -264,8 +272,12 @@ Task *YamlSerialization::deserializeTask(const YAML::Node &node)
 	if ( !tasks.IsSequence() )
 		return task;
 
-	foreach(YAML::Node subTask, tasks)
-		task->appendSubtask(deserializeTask(subTask));
+	foreach(YAML::Node subNode, tasks)
+	{
+		TaskSharedPointer subTask = deserializeTask(subNode);
+		subTask->setParent(task);
+		task->appendSubtask(subTask);
+	}
 
 	return task;
 }

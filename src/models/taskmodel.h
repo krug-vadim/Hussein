@@ -34,7 +34,7 @@ class TaskModel : public QAbstractItemModel
 		QMimeData *mimeData(const QModelIndexList &indexes) const;
 		bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
-		TaskSharedPointer root() const;
+		const TaskSharedPointer &root() const;
 
 		void tasksAboutToBeReseted();
 		void tasksReseted();
@@ -45,10 +45,12 @@ class TaskModel : public QAbstractItemModel
 	public slots:
 		void taskDataChanged(const QList<int> &path);
 
+	protected:
+		TaskSharedPointer getTask(const QModelIndex &index) const;
+
 	private:
 		QModelIndex pathToIndex(const QList<int> &path) const;
 
-		TaskSharedPointer getTask(const QModelIndex &index) const;
 
 		TaskSharedPointer _root;
 };

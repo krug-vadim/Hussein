@@ -5,10 +5,12 @@
 #include <QtCore/QList>
 #include <QtCore/QVariant>
 #include <QtCore/QSharedPointer>
+#include <QtCore/QWeakPointer>
 
 class Task;
 
 typedef QSharedPointer<Task> TaskSharedPointer;
+typedef QWeakPointer<Task> TaskWeakPointer;
 typedef QList<TaskSharedPointer> TaskList;
 
 class Task
@@ -25,7 +27,8 @@ class Task
 		Task();
 		virtual ~Task();
 
-		TaskSharedPointer parent() const;
+		TaskWeakPointer parent() const;
+		void setParent(const TaskWeakPointer &parent);
 
 		const QString &description() const;
 		void setDescription(const QString &description);
@@ -45,16 +48,14 @@ class Task
 		bool insertSubtask(const TaskSharedPointer &task, int position);
 		bool removeSubtask(int position);
 
-		int row() const;
-
 		QVariant data(int role) const;
 		bool setData(const QVariant &value, int role);
 
 	private:
-		void setParent(const TaskSharedPointer &parent);
-		void getPath(QList<int> &path);
 
-		TaskSharedPointer _parent;
+		//void getPath(QList<int> &path);
+
+		TaskWeakPointer _parent;
 
 		QString    _description;
 		bool       _done;
