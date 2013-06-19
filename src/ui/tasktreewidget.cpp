@@ -167,6 +167,16 @@ void TaskTreeWidget::setTitle(const QString &title)
 	_title = title;
 }
 
+void TaskTreeWidget::undo()
+{
+	_taskModel->undo();
+}
+
+void TaskTreeWidget::redo()
+{
+	_taskModel->redo();
+}
+
 void TaskTreeWidget::modifyTaskList()
 {
 	setModified(true);

@@ -4,7 +4,7 @@
 #include <QtWidgets/QWidget>
 
 class Task;
-class TaskModel;
+class GuiTaskModel;
 class TaskSortFilterProxyModel;
 
 class QFileSystemWatcher;
@@ -43,6 +43,9 @@ class TaskTreeWidget : public QWidget
 
 		void setTitle(const QString &title);
 
+		void undo();
+		void redo();
+
 	protected:
 		virtual void showEvent(QShowEvent * event);
 		virtual void keyPressEvent(QKeyEvent *event);
@@ -63,7 +66,7 @@ class TaskTreeWidget : public QWidget
 
 		bool _modified;
 
-		TaskModel *_taskModel;
+		GuiTaskModel *_taskModel;
 		TaskSortFilterProxyModel *_taskProxyModel;
 
 		QString _fileName;

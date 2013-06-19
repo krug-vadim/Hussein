@@ -54,6 +54,9 @@ class MainWindow : public QMainWindow
 
 		void toggleTaskDone();
 
+		void undoCurrent();
+		void redoCurrent();
+
 	private:
 		static const int DEFAULT_STATUS_TIME = 3000;
 

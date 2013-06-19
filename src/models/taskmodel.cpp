@@ -156,14 +156,7 @@ bool TaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 
 	beginRemoveRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-	{
-		TaskSharedPointer current;
-
-		current  = parentTask->subtasks().at(position);
 		success &= parentTask->removeSubtask(position);
-
-		current.clear();
-	}
 	endRemoveRows();
 
 	return success;

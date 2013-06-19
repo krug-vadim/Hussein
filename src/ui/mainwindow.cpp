@@ -325,7 +325,6 @@ void MainWindow::saveSettings()
 	settings["files"] = openedFiles;
 	settings["current"] = ui->tabWidget->currentIndex();
 
-
 	QString settingsSavePath;
 
 	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
@@ -341,6 +340,26 @@ void MainWindow::toggleTaskDone()
 		return;
 
 	taskTreeWidget->toggleDone();
+}
+
+void MainWindow::undoCurrent()
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+
+	if ( !taskTreeWidget )
+		return;
+
+	taskTreeWidget->undo();
+}
+
+void MainWindow::redoCurrent()
+{
+	TaskTreeWidget *taskTreeWidget = qobject_cast<TaskTreeWidget *>(ui->tabWidget->currentWidget());
+
+	if ( !taskTreeWidget )
+		return;
+
+	taskTreeWidget->redo();
 }
 
 void MainWindow::status(const QString &message)
@@ -387,6 +406,12 @@ void MainWindow::setupActions()
 	        this, &MainWindow::quit);
 
 	// menu edit
+	connect(ui->actionUndo, &QAction::triggered,
+	        this, &MainWindow::undoCurrent);
+
+	connect(ui->actionRedo, &QAction::triggered,
+	        this, &MainWindow::redoCurrent);
+
 	connect(ui->actionToggleDone, &QAction::triggered,
 	        this, &MainWindow::toggleTaskDone);
 }
