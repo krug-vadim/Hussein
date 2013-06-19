@@ -15,7 +15,6 @@ SOURCES += \
     src/ui/tasktabwidget.cpp \
     src/limbs/taskmimedata.cpp \
     src/models/guitaskmodel.cpp \
-    src/models/commands/changevaluecommand.cpp \
     src/models/commands/taskremovecommand.cpp \
     src/models/commands/taskinsertcommand.cpp
 
@@ -30,7 +29,6 @@ HEADERS  += \
     src/ui/tasktabwidget.h \
     src/limbs/taskmimedata.h \
     src/models/guitaskmodel.h \
-    src/models/commands/changevaluecommand.h \
     src/models/commands/taskremovecommand.h \
     src/models/commands/taskinsertcommand.h
 

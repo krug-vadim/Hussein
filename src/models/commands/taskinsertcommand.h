@@ -18,6 +18,7 @@ class TaskInsertCommand : public QUndoCommand
 	private:
 		GuiTaskModel *_model;
 		TaskSharedPointer _parent;
+		TaskSharedPointer _task;
 		int _position;
 };
 
