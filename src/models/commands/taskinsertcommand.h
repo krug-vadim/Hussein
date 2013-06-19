@@ -3,22 +3,21 @@
 
 #include <QtWidgets/QUndoCommand>
 
-#include "../../limbs/task.h"
+#include "../taskmodel.h"
 
 class GuiTaskModel;
 
 class TaskInsertCommand : public QUndoCommand
 {
 	public:
-		TaskInsertCommand(GuiTaskModel *model, const TaskSharedPointer &parent, int position);
+		TaskInsertCommand(GuiTaskModel *model, const QModelIndex &parent, int position);
 
 		void redo();
 		void undo();
 
 	private:
 		GuiTaskModel *_model;
-		TaskSharedPointer _parent;
-		TaskSharedPointer _task;
+		TaskModel::Path _path;
 		int _position;
 };
 

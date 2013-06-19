@@ -133,6 +133,8 @@ bool TaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
 	bool success = true;
 
+	qDebug() << "TaskModel::insertRows" << position << rows << parent;
+
 	TaskSharedPointer parentTask = getTask(parent);
 
 	beginInsertRows(parent, position, position + rows - 1);
@@ -196,6 +198,22 @@ const TaskSharedPointer &TaskModel::root() const
 	return _root;
 }
 
+bool TaskModel::insertRow(const TaskSharedPointer &task, int position, const QModelIndex &parent)
+{
+	bool success = true;
+
+	TaskSharedPointer parentTask = getTask(parent);
+
+	beginInsertRows(parent, position, position);
+
+	task->setParent(parentTask);
+	success &= parentTask->insertSubtask(task, position);
+
+	endInsertRows();
+
+	return success;
+}
+
 Qt::DropActions TaskModel::supportedDropActions() const
 {
 	return Qt::MoveAction;
@@ -250,17 +268,30 @@ void TaskModel::taskDataChanged(const QList<int> &path)
 	emit dataChanged(index, index);
 }
 
-QModelIndex TaskModel::pathToIndex(const QList<int> &path) const
+QModelIndex TaskModel::pathToIndex(const Path &path) const
 {
-	if ( path.isEmpty() )
-		return QModelIndex();
+	QModelIndex iter;
 
-	QModelIndex index = this->index(path.last(), 0);
+	foreach(int row, path)
+		iter = index(row, 0, iter);
 
-	for(int i = path.size() - 1; i > 0; i--)
-		index = index.child(path.at(i-1), 0);
+	return iter;
+}
 
-	return index;
+TaskModel::Path TaskModel::indexToPath(const QModelIndex &index)
+{
+	Path path;
+	QModelIndex p;
+
+	p = index;
+
+	while ( p.isValid() )
+	{
+		path.push_front(p.row());
+		p = p.parent();
+	}
+
+	return path;
 }
 
 TaskSharedPointer TaskModel::getTask(const QModelIndex &index) const

@@ -16,7 +16,9 @@ SOURCES += \
     src/limbs/taskmimedata.cpp \
     src/models/guitaskmodel.cpp \
     src/models/commands/taskremovecommand.cpp \
-    src/models/commands/taskinsertcommand.cpp
+    src/models/commands/taskinsertcommand.cpp \
+    src/models/commands/tasksetdatacommand.cpp \
+    src/models/commands/taskmovecommand.cpp
 
 HEADERS  += \
     src/models/taskmodel.h \
@@ -30,7 +32,9 @@ HEADERS  += \
     src/limbs/taskmimedata.h \
     src/models/guitaskmodel.h \
     src/models/commands/taskremovecommand.h \
-    src/models/commands/taskinsertcommand.h
+    src/models/commands/taskinsertcommand.h \
+    src/models/commands/tasksetdatacommand.h \
+    src/models/commands/taskmovecommand.h
 
 FORMS    += \
     src/ui/mainwindow.ui \

@@ -2,41 +2,26 @@
 
 #include "../guitaskmodel.h"
 
-#include <QDebug>
-
-TaskInsertCommand::TaskInsertCommand(GuiTaskModel *model, const TaskSharedPointer &parent, int position)
+TaskInsertCommand::TaskInsertCommand(GuiTaskModel *model, const QModelIndex &parent, int position)
     : QUndoCommand()
     , _model(model)
-    , _parent(parent)
     , _position(position)
 {
-	_task = TaskSharedPointer(new Task());
-	_task->setParent(_parent);
+	_path = _model->indexToPath(parent);
 
-	setText(QString("Insert task to parent %1 at %2")
-	        .arg(_parent->description())
-	        .arg(position)
-	       );
+	// TODO: change description to more verbose
+	setText(QString("Insert new task"));
 }
 
 void TaskInsertCommand::redo()
 {
-	if ( _parent.isNull() )
-		return;
+	QModelIndex parent = _model->pathToIndex(_path);
 
-	qDebug() << "redo";
-
-	_parent->insertSubtask(_task, _position);
+	_model->TaskModel::insertRows(_position, 1, parent);
 }
 
 void TaskInsertCommand::undo()
 {
-	if ( _parent.isNull() )
-		return;
-
-	qDebug() << "undo" << _parent->description() << _parent->subtasks().size() << _position;
-
-	_model->layoutAboutToBeChanged();
-	_parent->removeSubtask(_position);
-	_model->layoutChanged();
+	QModelIndex parent = _model->pathToIndex(_path);
+	_model->TaskModel::removeRows(_position, 1, parent);
 }

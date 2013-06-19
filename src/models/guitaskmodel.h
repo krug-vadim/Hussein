@@ -16,8 +16,11 @@ class GuiTaskModel : public TaskModel
 
 		QVariant data(const QModelIndex &index, int role) const;
 
-		bool insertRows(int position, int rows, const QModelIndex &parent);
-		bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex());
+		virtual bool insertRows(int position, int rows, const QModelIndex &parent);
+		virtual bool moveRows(const QModelIndex & sourceParent, int sourceRow, int count, const QModelIndex & destinationParent, int destinationChild);
+		virtual bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex());
+
+		virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 
 	public slots:
 		void undo();

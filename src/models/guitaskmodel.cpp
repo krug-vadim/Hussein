@@ -9,7 +9,9 @@
 #include "../limbs/task.h"
 
 #include "commands/taskinsertcommand.h"
+#include "commands/taskmovecommand.h"
 #include "commands/taskremovecommand.h"
+#include "commands/tasksetdatacommand.h"
 
 #include <QDebug>
 
@@ -17,6 +19,7 @@ GuiTaskModel::GuiTaskModel(QObject *parent) :
     TaskModel(parent)
 {
 	_undoStack = new QUndoStack(this);
+	_undoStack->clear();
 }
 
 QVariant GuiTaskModel::data(const QModelIndex &index, int role) const
@@ -55,41 +58,55 @@ bool GuiTaskModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
 	bool success = true;
 
-	TaskSharedPointer parentTask = getTask(parent);
-
-	beginInsertRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-		_undoStack->push(new TaskInsertCommand(this, parentTask, position));
-	endInsertRows();
+		_undoStack->push(new TaskInsertCommand(this, parent, position));
 
 	return success;
+}
+
+bool GuiTaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int count, const QModelIndex &destinationParent, int destinationChild)
+{
+	bool success = true;
+
+	for(int i = 0; i < count; i++)
+		_undoStack->push(new TaskMoveCommand(this, sourceParent, sourceRow, destinationParent, destinationChild));
+
+	return success;
+
 }
 
 bool GuiTaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
-	TaskSharedPointer parentTask = getTask(parent);
-
 	bool success = true;
 
-	beginRemoveRows(parent, position, position + rows - 1);
 	for(int i = 0; i < rows; i++)
-	{
-		_undoStack->push(new TaskRemoveCommand(this, parentTask->subtasks().at(position)));
-		//success &= parentTask->removeSubtask(position);
-	}
-	endRemoveRows();
+		_undoStack->push(new TaskRemoveCommand(this, parent, position));
 
 	return success;
 }
 
+bool GuiTaskModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+	_undoStack->push(new TaskSetDataCommand(this, index, value, role));
+	return true;
+}
+
 void GuiTaskModel::undo()
 {
+	if ( !_undoStack->canUndo() )
+		return;
+
+	qDebug() << "undo" << _undoStack->index();
+
 	qDebug() << "undo" << _undoStack->undoText();
 	_undoStack->undo();
 }
 
 void GuiTaskModel::redo()
 {
-	qDebug() << "redo";
+	if ( !_undoStack->canRedo() )
+		return;
+
+	qDebug() << "redo" << _undoStack->redoText();
 	_undoStack->redo();
 }

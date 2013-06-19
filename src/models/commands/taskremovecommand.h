@@ -4,21 +4,23 @@
 #include <QtWidgets/QUndoCommand>
 
 #include "../../limbs/task.h"
+#include "../taskmodel.h"
 
 class GuiTaskModel;
 
 class TaskRemoveCommand : public QUndoCommand
 {
 	public:
-		explicit TaskRemoveCommand(GuiTaskModel *model, const TaskSharedPointer &task);
+		TaskRemoveCommand(GuiTaskModel *model, const QModelIndex &parent, int position);
 
 		void redo();
 		void undo();
 
 	private:
 		GuiTaskModel *_model;
-		TaskSharedPointer _task;
+		TaskModel::Path _path;
 		int _position;
+		TaskSharedPointer _task;
 };
 
 #endif // TASKREMOVECOMMAND_H

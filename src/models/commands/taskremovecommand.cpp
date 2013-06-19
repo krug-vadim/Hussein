@@ -4,31 +4,30 @@
 
 #include <QDebug>
 
-TaskRemoveCommand::TaskRemoveCommand(GuiTaskModel *model, const TaskSharedPointer &task)
+TaskRemoveCommand::TaskRemoveCommand(GuiTaskModel *model, const QModelIndex &parent, int position)
     : QUndoCommand()
     , _model(model)
-    , _task(task)
+    , _position(position)
 {
-	setText(QString("Remove task «%1»").arg(_task->description()));
+	_path = _model->indexToPath(parent);
+
+	// TODO: change description to more verbose
+	setText(QString("Remove task"));
 }
 
 void TaskRemoveCommand::redo()
 {
-	if ( _task->parent().isNull() )
-		return;
+	QModelIndex parent = _model->pathToIndex(_path);
+	QModelIndex taskIndex = (parent.isValid()) ? parent.child(_position, 0) : _model->index(_position, 0);
 
-	_position = _task->parent().toStrongRef()->subtasks().indexOf(_task);
-	_task->parent().toStrongRef()->removeSubtask(_position);
+	_task = _model->getTask(taskIndex);
+
+	_model->TaskModel::removeRows(_position, 1, parent);
 }
 
 void TaskRemoveCommand::undo()
 {
-	if ( _task->parent().isNull() )
-		return;
-
-	_model->layoutAboutToBeChanged();
-
-	_task->parent().toStrongRef()->insertSubtask(_task, _position);
-
-	_model->layoutChanged();
+	QModelIndex parent = _model->pathToIndex(_path);
+	_model->TaskModel::insertRow(_task, _position, parent);
+	_task.clear();
 }

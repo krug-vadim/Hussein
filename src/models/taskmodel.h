@@ -9,6 +9,8 @@ class TaskModel : public QAbstractItemModel
 	Q_OBJECT
 
 	public:
+		typedef QList<int> Path;
+
 		explicit TaskModel(QObject *parent = 0);
 		~TaskModel();
 
@@ -36,11 +38,17 @@ class TaskModel : public QAbstractItemModel
 
 		const TaskSharedPointer &root() const;
 
+		//
+		bool insertRow(const TaskSharedPointer &task, int position, const QModelIndex &parent = QModelIndex());
+
 		void tasksAboutToBeReseted();
 		void tasksReseted();
 
 		bool loadTasklist(const QString &fileName);
 		bool saveTasklist(const QString &fileName);
+
+		QModelIndex pathToIndex(const Path &path) const;
+		Path indexToPath(const QModelIndex &index);
 
 	public slots:
 		void taskDataChanged(const QList<int> &path);
@@ -49,9 +57,6 @@ class TaskModel : public QAbstractItemModel
 		TaskSharedPointer getTask(const QModelIndex &index) const;
 
 	private:
-		QModelIndex pathToIndex(const QList<int> &path) const;
-
-
 		TaskSharedPointer _root;
 };
 
