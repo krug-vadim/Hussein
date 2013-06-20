@@ -174,6 +174,8 @@ bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int cou
 
 	bool success = true;
 
+	qDebug() << "move rows" << fromTask->description() << toTask->description();
+
 	if ( !beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild) )
 		return false;
 
@@ -189,6 +191,8 @@ bool TaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int cou
 	}
 
 	endMoveRows();
+
+	qDebug() << "move end";
 
 	return success;
 }

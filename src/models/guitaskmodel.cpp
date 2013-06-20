@@ -68,8 +68,12 @@ bool GuiTaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int 
 {
 	bool success = true;
 
+	qDebug() << "gui move start";
+
 	for(int i = 0; i < count; i++)
 		_undoStack->push(new TaskMoveCommand(this, sourceParent, sourceRow, destinationParent, destinationChild));
+
+	qDebug() << "gui move end";
 
 	return success;
 
@@ -97,9 +101,11 @@ void GuiTaskModel::undo()
 		return;
 
 	qDebug() << "undo" << _undoStack->index();
-
 	qDebug() << "undo" << _undoStack->undoText();
+
 	_undoStack->undo();
+
+	qDebug() << "undo end";
 }
 
 void GuiTaskModel::redo()
@@ -108,5 +114,8 @@ void GuiTaskModel::redo()
 		return;
 
 	qDebug() << "redo" << _undoStack->redoText();
+
 	_undoStack->redo();
+
+	qDebug() << "redo end";
 }
