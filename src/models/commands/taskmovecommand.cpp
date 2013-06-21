@@ -21,6 +21,8 @@ void TaskMoveCommand::redo()
 	QModelIndex sourceIndex      = _model->pathToIndex(_sourceParentPath);
 	QModelIndex destinationIndex = _model->pathToIndex(_destinationParentPath);
 
+	qDebug() << _sourceParentPath << _destinationParentPath;
+
 	qDebug() << "taskmove redo" << sourceIndex << destinationIndex;
 
 	_model->TaskModel::moveRows(sourceIndex, _sourcePosition, 1, destinationIndex, _destinationPosition);
