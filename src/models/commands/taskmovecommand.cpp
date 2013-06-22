@@ -21,9 +21,10 @@ void TaskMoveCommand::redo()
 	QModelIndex sourceIndex      = _model->pathToIndex(_sourceParentPath);
 	QModelIndex destinationIndex = _model->pathToIndex(_destinationParentPath);
 
-	qDebug() << _sourceParentPath << _destinationParentPath;
-
 	qDebug() << "taskmove redo" << sourceIndex << destinationIndex;
+	qDebug() << _sourceParentPath << _destinationParentPath;
+	qDebug() << _sourcePosition << _destinationPosition;
+	qDebug() << "taskmove redo moving";
 
 	_model->TaskModel::moveRows(sourceIndex, _sourcePosition, 1, destinationIndex, _destinationPosition);
 }
@@ -34,6 +35,9 @@ void TaskMoveCommand::undo()
 	QModelIndex destinationIndex = _model->pathToIndex(_destinationParentPath);
 
 	qDebug() << "taskmove undo" << sourceIndex << destinationIndex;
+	qDebug() << _sourceParentPath << _destinationParentPath;
+	qDebug() << _sourcePosition << _destinationPosition;
+	qDebug() << "taskmove redo moving";
 
 	_model->TaskModel::moveRows(destinationIndex, _destinationPosition, 1, sourceIndex, _sourcePosition);
 
