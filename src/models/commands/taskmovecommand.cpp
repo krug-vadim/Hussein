@@ -40,7 +40,10 @@ void TaskMoveCommand::undo()
 	QModelIndex sourceIndex      = _model->pathToIndex(_sourceParentPath);
 	QModelIndex destinationIndex = _model->pathToIndex(_destinationParentPath);
 
-	_model->TaskModel::moveRows(destinationIndex, _destinationPosition, 1, sourceIndex, _sourcePosition);
+	if ( sourceIndex == destinationIndex )
+		_model->TaskModel::moveRows(sourceIndex, _sourcePosition, 1, destinationIndex, _destinationPosition);
+	else
+		_model->TaskModel::moveRows(destinationIndex, _destinationPosition, 1, sourceIndex, _sourcePosition);
 
 	stUndo.endMacro();
 	_model->setCurrentUndoStack(cur);

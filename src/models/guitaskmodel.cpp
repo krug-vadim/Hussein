@@ -68,16 +68,12 @@ bool GuiTaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int 
 {
 	bool success = true;
 
-	qDebug() << "gui move start";
-
 	for(int i = 0; i < count; i++)
 	{
 		_undoStack->beginMacro("dsd");
 		_undoStack->push(new TaskMoveCommand(this, sourceParent, sourceRow, destinationParent, destinationChild));
 		_undoStack->endMacro();
 	}
-
-	qDebug() << "gui move end";
 
 	return success;
 
@@ -95,7 +91,6 @@ bool GuiTaskModel::removeRows(int position, int rows, const QModelIndex &parent)
 
 bool GuiTaskModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-	qDebug() << "set data" << index << role;
 	_undoStack->push(new TaskSetDataCommand(this, index, value, role));
 	return true;
 }
@@ -105,12 +100,7 @@ void GuiTaskModel::undo()
 	if ( !_undoStack->canUndo() )
 		return;
 
-	qDebug() << "undo" << _undoStack->index();
-	qDebug() << "undo" << _undoStack->undoText();
-
 	_undoStack->undo();
-
-	qDebug() << "undo end";
 }
 
 void GuiTaskModel::redo()
@@ -118,12 +108,7 @@ void GuiTaskModel::redo()
 	if ( !_undoStack->canRedo() )
 		return;
 
-	qDebug() << "redo" << _undoStack->index() << _undoStack->count();
-	qDebug() << "redo" << _undoStack->redoText();
-
 	_undoStack->redo();
-
-	qDebug() << "redo end";
 }
 
 QUndoStack *GuiTaskModel::currentUndoStack() const
