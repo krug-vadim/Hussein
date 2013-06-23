@@ -2,6 +2,7 @@
 #define TASKMOVECOMMAND_H
 
 #include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
 
 #include "../taskmodel.h"
 
@@ -21,6 +22,8 @@ class TaskMoveCommand : public QUndoCommand
 		TaskModel::Path _destinationParentPath;
 		int _sourcePosition;
 		int _destinationPosition;
+
+		QUndoStack stRedo, stUndo;
 };
 
 #endif // TASKMOVECOMMAND_H

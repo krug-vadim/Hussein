@@ -2,6 +2,7 @@
 #define TASKREMOVECOMMAND_H
 
 #include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
 
 #include "../../limbs/task.h"
 #include "../taskmodel.h"
@@ -21,6 +22,8 @@ class TaskRemoveCommand : public QUndoCommand
 		TaskModel::Path _path;
 		int _position;
 		TaskSharedPointer _task;
+
+		QUndoStack stRedo, stUndo;
 };
 
 #endif // TASKREMOVECOMMAND_H

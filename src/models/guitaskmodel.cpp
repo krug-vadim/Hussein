@@ -125,3 +125,13 @@ void GuiTaskModel::redo()
 
 	qDebug() << "redo end";
 }
+
+QUndoStack *GuiTaskModel::currentUndoStack() const
+{
+	return _undoStack;
+}
+
+void GuiTaskModel::setCurrentUndoStack(QUndoStack *stack)
+{
+	_undoStack = stack;
+}

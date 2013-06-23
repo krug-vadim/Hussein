@@ -18,27 +18,33 @@ TaskMoveCommand::TaskMoveCommand(GuiTaskModel *model, const QModelIndex &sourceP
 
 void TaskMoveCommand::redo()
 {
+	QUndoStack *cur = _model->currentUndoStack();
+	_model->setCurrentUndoStack(&stRedo);
+	stRedo.beginMacro("move row");
+
 	QModelIndex sourceIndex      = _model->pathToIndex(_sourceParentPath);
 	QModelIndex destinationIndex = _model->pathToIndex(_destinationParentPath);
 
-	qDebug() << "taskmove redo" << sourceIndex << destinationIndex;
-	qDebug() << _sourceParentPath << _destinationParentPath;
-	qDebug() << _sourcePosition << _destinationPosition;
-	qDebug() << "taskmove redo moving";
-
 	_model->TaskModel::moveRows(sourceIndex, _sourcePosition, 1, destinationIndex, _destinationPosition);
+
+	stRedo.endMacro();
+	_model->setCurrentUndoStack(cur);
 }
 
 void TaskMoveCommand::undo()
 {
+	QUndoStack *cur = _model->currentUndoStack();
+	_model->setCurrentUndoStack(&stUndo);
+	stUndo.beginMacro("nested move row");
+
 	QModelIndex sourceIndex      = _model->pathToIndex(_sourceParentPath);
 	QModelIndex destinationIndex = _model->pathToIndex(_destinationParentPath);
 
-	qDebug() << "taskmove undo" << sourceIndex << destinationIndex;
-	qDebug() << _sourceParentPath << _destinationParentPath;
-	qDebug() << _sourcePosition << _destinationPosition;
-	qDebug() << "taskmove redo moving";
-
 	_model->TaskModel::moveRows(destinationIndex, _destinationPosition, 1, sourceIndex, _sourcePosition);
 
+	stUndo.endMacro();
+	_model->setCurrentUndoStack(cur);
+	stUndo.clear();
+	while(stRedo.canUndo()) stRedo.undo();
+	stRedo.clear();
 }

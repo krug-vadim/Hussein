@@ -2,6 +2,7 @@
 #define TASKSETDATACOMMAND_H
 
 #include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
 
 #include "../../limbs/task.h"
 #include "../taskmodel.h"
@@ -22,6 +23,8 @@ class TaskSetDataCommand : public QUndoCommand
 		QVariant _oldValue;
 		QVariant _newValue;
 		int _role;
+
+		QUndoStack stRedo, stUndo;
 };
 
 #endif // TASKSETDATACOMMAND_H

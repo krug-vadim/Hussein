@@ -2,6 +2,7 @@
 #define TASKINSERTCOMMAND_H
 
 #include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
 
 #include "../taskmodel.h"
 
@@ -19,6 +20,8 @@ class TaskInsertCommand : public QUndoCommand
 		GuiTaskModel *_model;
 		TaskModel::Path _path;
 		int _position;
+
+		QUndoStack stRedo, stUndo;
 };
 
 #endif // TASKINSERTCOMMAND_H

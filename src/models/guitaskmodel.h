@@ -9,7 +9,10 @@ class GuiTaskModel : public TaskModel
 {
 	Q_OBJECT
 
+	friend class TaskInsertCommand;
+	friend class TaskMoveCommand;
 	friend class TaskRemoveCommand;
+	friend class TaskSetDataCommand;
 
 	public:
 		explicit GuiTaskModel(QObject *parent = 0);
@@ -27,6 +30,9 @@ class GuiTaskModel : public TaskModel
 		void redo();
 
 	private:
+		QUndoStack *currentUndoStack() const;
+		void setCurrentUndoStack(QUndoStack *stack);
+
 		QUndoStack *_undoStack;
 };
 
