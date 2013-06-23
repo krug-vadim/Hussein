@@ -12,9 +12,8 @@ class TaskTreeView : public QTreeView
 	public:
 		explicit TaskTreeView(QWidget *parent = 0);
 
-		void setModel(QAbstractItemModel *model);
-
 	public slots:
+		void expandTask(const QModelIndex &index);
 		void expandTasks();
 
 	protected:
@@ -24,10 +23,6 @@ class TaskTreeView : public QTreeView
 	private slots:
 		void taskCollapsed(const QModelIndex &index);
 		void taskExpanded(const QModelIndex &index);
-
-		void expandTask(const QModelIndex &index);
-
-		void layoutChanged(const QList<QPersistentModelIndex> &parents = QList<QPersistentModelIndex>(), QAbstractItemModel::LayoutChangeHint hint = QAbstractItemModel::NoLayoutChangeHint);
 
 	private:
 		int unSelectedRowBefore(const QModelIndex &index);

@@ -24,6 +24,8 @@ class Task
 		}
 		TaskDataRole;
 
+
+
 		Task();
 		virtual ~Task();
 
@@ -52,9 +54,6 @@ class Task
 		bool setData(const QVariant &value, int role);
 
 	private:
-
-		//void getPath(QList<int> &path);
-
 		TaskWeakPointer _parent;
 
 		QString    _description;

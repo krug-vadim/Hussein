@@ -47,11 +47,8 @@ class TaskModel : public QAbstractItemModel
 		bool loadTasklist(const QString &fileName);
 		bool saveTasklist(const QString &fileName);
 
-		QModelIndex pathToIndex(const Path &path) const;
-		Path indexToPath(const QModelIndex &index);
-
-	public slots:
-		void taskDataChanged(const QList<int> &path);
+		QModelIndex pathToIndex(const TaskModel::Path &path) const;
+		TaskModel::Path indexToPath(const QModelIndex &index);
 
 	protected:
 		TaskSharedPointer getTask(const QModelIndex &index) const;

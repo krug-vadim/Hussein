@@ -130,23 +130,6 @@ void TaskTreeView::expandTasks()
 		expandTask(model()->index(i, 0));
 }
 
-void TaskTreeView::setModel(QAbstractItemModel *model)
-{
-	if ( this->model() )
-	{
-		disconnect(this->model(), SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),
-		           this, SLOT(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)));
-	}
-
-	QTreeView::setModel(model);
-
-	if ( this->model() )
-	{
-		connect(this->model(), SIGNAL(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)),
-		        this, SLOT(layoutChanged(QList<QPersistentModelIndex>,QAbstractItemModel::LayoutChangeHint)));
-	}
-}
-
 void TaskTreeView::expandTask(const QModelIndex &index)
 {
 	if ( !index.isValid() )
@@ -156,11 +139,6 @@ void TaskTreeView::expandTask(const QModelIndex &index)
 
 	for(int i = 0; i < model()->rowCount(index); i++)
 		expandTask(index.child(i, 0));
-}
-
-void TaskTreeView::layoutChanged(const QList<QPersistentModelIndex> &parents, QAbstractItemModel::LayoutChangeHint hint)
-{
-	expandTasks();
 }
 
 int TaskTreeView::unSelectedRowBefore(const QModelIndex &index)

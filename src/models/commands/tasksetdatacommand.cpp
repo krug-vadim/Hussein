@@ -2,6 +2,8 @@
 
 #include "../guitaskmodel.h"
 
+#include <QDebug>
+
 TaskSetDataCommand::TaskSetDataCommand(GuiTaskModel *model, const QModelIndex &index, QVariant value, int role)
     : QUndoCommand()
     , _model(model)
@@ -23,6 +25,8 @@ void TaskSetDataCommand::redo()
 	QModelIndex index = _model->pathToIndex(_path);
 	_model->TaskModel::setData(index, _newValue, _role);
 
+	qDebug() << "set data redo to " << index << _role;
+
 	stRedo.endMacro();
 	_model->setCurrentUndoStack(cur);
 }
@@ -35,6 +39,8 @@ void TaskSetDataCommand::undo()
 
 	QModelIndex index = _model->pathToIndex(_path);
 	_model->TaskModel::setData(index, _oldValue, _role);
+
+	qDebug() << "set data undo to " << index << _role;
 
 	stUndo.endMacro();
 	_model->setCurrentUndoStack(cur);

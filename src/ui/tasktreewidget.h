@@ -46,6 +46,8 @@ class TaskTreeWidget : public QWidget
 		void undo();
 		void redo();
 
+		void taskDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int>&roles = QVector<int>());
+
 	protected:
 		virtual void showEvent(QShowEvent * event);
 		virtual void keyPressEvent(QKeyEvent *event);

@@ -27,8 +27,6 @@ TaskTreeWidget::TaskTreeWidget(QWidget *parent) :
 	_fileName = QString();
 
 	_taskModel = new GuiTaskModel(this);
-	/*connect(_taskModel, SIGNAL(rowsMoved(QModelIndex,int,int,QModelIndex,int)),
-	        ui->tasksView, SLOT(expandTasks()));*/
 
 	_taskProxyModel = new TaskSortFilterProxyModel(this);
 	_taskProxyModel->setSourceModel(_taskModel);
@@ -175,6 +173,18 @@ void TaskTreeWidget::undo()
 void TaskTreeWidget::redo()
 {
 	_taskModel->redo();
+}
+
+void TaskTreeWidget::taskDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+	Q_UNUSED(bottomRight);
+
+	qDebug() <<"data changed"<< topLeft << roles;
+
+	if ( topLeft.isValid() )
+		ui->tasksView->expandTask(_taskProxyModel->mapFromSource(topLeft));
+	else
+		ui->tasksView->expandTasks();
 }
 
 void TaskTreeWidget::modifyTaskList()

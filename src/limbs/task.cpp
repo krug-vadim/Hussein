@@ -30,6 +30,9 @@ const QString &Task::description() const
 
 void Task::setDescription(const QString &description)
 {
+	if ( _description == description )
+		return;
+
 	_description = description;
 }
 
@@ -122,14 +125,6 @@ bool Task::removeSubtask(int position)
 
 	return true;
 }
-
-/*void Task::getPath(QList<int> &path)
-{
-	path.clear();
-
-	for(Task *current = this; current->row() != -1; current = current->parent())
-		path.append(current->row());
-}*/
 
 QVariant Task::data(int role) const
 {

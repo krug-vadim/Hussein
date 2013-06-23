@@ -69,14 +69,9 @@ bool GuiTaskModel::moveRows(const QModelIndex &sourceParent, int sourceRow, int 
 	bool success = true;
 
 	for(int i = 0; i < count; i++)
-	{
-		_undoStack->beginMacro("dsd");
 		_undoStack->push(new TaskMoveCommand(this, sourceParent, sourceRow, destinationParent, destinationChild));
-		_undoStack->endMacro();
-	}
 
 	return success;
-
 }
 
 bool GuiTaskModel::removeRows(int position, int rows, const QModelIndex &parent)

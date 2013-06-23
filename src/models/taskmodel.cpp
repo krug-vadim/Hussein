@@ -124,7 +124,7 @@ bool TaskModel::setData(const QModelIndex &index, const QVariant &value, int rol
 	bool res = getTask(index)->setData(value, role);
 
 	if ( res )
-		emit dataChanged(index, index);
+		emit dataChanged(index, index, QVector<int>() << role);
 
 	return res;
 }
@@ -260,13 +260,7 @@ bool TaskModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int r
 	return false;
 }
 
-void TaskModel::taskDataChanged(const QList<int> &path)
-{
-	QModelIndex index = pathToIndex(path);
-	emit dataChanged(index, index);
-}
-
-QModelIndex TaskModel::pathToIndex(const Path &path) const
+QModelIndex TaskModel::pathToIndex(const TaskModel::Path &path) const
 {
 	QModelIndex iter;
 
@@ -278,7 +272,7 @@ QModelIndex TaskModel::pathToIndex(const Path &path) const
 
 TaskModel::Path TaskModel::indexToPath(const QModelIndex &index)
 {
-	Path path;
+	TaskModel::Path path;
 	QModelIndex p;
 
 	p = index;
