@@ -76,9 +76,6 @@ class MainWindow : public QMainWindow
 		bool _doExit;
 		QSystemTrayIcon *_trayIcon;
 
-		QByteArray _windowGeometry;
-		QByteArray _windowState;
-
 		Ui::MainWindow *ui;
 };
 

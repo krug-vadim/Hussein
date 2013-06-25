@@ -270,9 +270,6 @@ void MainWindow::quit()
 
 void MainWindow::placeToTray()
 {
-	_windowGeometry = saveGeometry();
-	_windowState = saveState();
-
 	_trayIcon->show();
 	hide();
 }
@@ -284,12 +281,8 @@ void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
 
 	if ( isHidden() )
 	{
-		restoreGeometry(_windowGeometry);
-		restoreState(_windowState);
-
 		show();
-		raise();
-		setFocus();
+		activateWindow();
 		_trayIcon->hide();
 	}
 	else
@@ -300,6 +293,8 @@ void MainWindow::loadSettings()
 {
 	QVariantHash settings;
 	QString settingsSavePath;
+
+	qDebug() << "loading settings";
 
 	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
 
