@@ -5,6 +5,7 @@
 #include <QtWidgets/QSystemTrayIcon>
 
 class QSignalMapper;
+class QSessionManager;
 class TaskTreeWidget;
 
 namespace Ui
@@ -57,6 +58,8 @@ class MainWindow : public QMainWindow
 		void undoCurrent();
 		void redoCurrent();
 
+		void commitAppData(QSessionManager & manager);
+
 	private:
 		static const int DEFAULT_STATUS_TIME = 3000;
 
@@ -72,6 +75,9 @@ class MainWindow : public QMainWindow
 
 		bool _doExit;
 		QSystemTrayIcon *_trayIcon;
+
+		QByteArray _windowGeometry;
+		QByteArray _windowState;
 
 		Ui::MainWindow *ui;
 };

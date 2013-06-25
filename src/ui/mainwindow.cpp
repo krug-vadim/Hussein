@@ -6,6 +6,7 @@
 #include <QtCore/QSignalMapper>
 
 #include <QtGui/QCloseEvent>
+#include <QtGui/QSessionManager>
 
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
@@ -21,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	_doExit = false;
 
 	ui->setupUi(this);
+
+	connect(qApp, SIGNAL(commitDataRequest(QSessionManager&)),
+	        this, SLOT(commitAppData(QSessionManager&)));
 
 	createTrayIcon();
 
@@ -266,6 +270,9 @@ void MainWindow::quit()
 
 void MainWindow::placeToTray()
 {
+	_windowGeometry = saveGeometry();
+	_windowState = saveState();
+
 	_trayIcon->show();
 	hide();
 }
@@ -277,6 +284,9 @@ void MainWindow::trayActivated(QSystemTrayIcon::ActivationReason reason)
 
 	if ( isHidden() )
 	{
+		restoreGeometry(_windowGeometry);
+		restoreState(_windowState);
+
 		show();
 		raise();
 		setFocus();
@@ -362,6 +372,11 @@ void MainWindow::redoCurrent()
 		return;
 
 	taskTreeWidget->redo();
+}
+
+void MainWindow::commitAppData(QSessionManager &manager)
+{
+	saveSettings();
 }
 
 void MainWindow::status(const QString &message)
