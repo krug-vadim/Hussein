@@ -11,7 +11,7 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 
-#include "../serialization/yamlserialization.h"
+#include "../serialization/jsonserializer.h"
 
 #include <QDebug>
 
@@ -127,7 +127,7 @@ bool MainWindow::saveTaskList(int index, bool askForNewFileName)
 		saveFileName = QFileDialog::getSaveFileName(this,
 		                                            tr("Save tasklist"),
 		                                            QString(),
-		                                            tr("Tasklist (*.yml);;Any (*.*)"));
+		                                            tr("Tasklist (*.json);;Any (*.*)"));
 	}
 	else
 		saveFileName = taskTreeWidget->fileName();
@@ -298,7 +298,7 @@ void MainWindow::loadSettings()
 
 	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
 
-	YamlSerialization::deserializeSettings(settingsSavePath, settings);
+	JsonSerializer::deserializeSettings(settingsSavePath, settings);
 
 	if ( settings.contains(tr("geometry")) )
 		restoreGeometry(QByteArray::fromHex(settings.value(tr("geometry"), QByteArray()).toByteArray()));
@@ -336,7 +336,7 @@ void MainWindow::saveSettings()
 
 	settingsSavePath = QString("%1/Hussein.conf").arg(QCoreApplication::applicationDirPath());
 
-	YamlSerialization::serializeSettings(settingsSavePath, settings);
+	JsonSerializer::serializeSettings(settingsSavePath, settings);
 }
 
 void MainWindow::toggleTaskDone()

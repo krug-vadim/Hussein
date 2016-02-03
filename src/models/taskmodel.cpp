@@ -1,9 +1,10 @@
 #include "taskmodel.h"
 
-#include "../serialization/yamlserialization.h"
+#include "../serialization/jsonserializer.h"
 
 #include <QtCore/QMimeData>
 #include <QtCore/QStringList>
+#include <QtCore/QDataStream>
 
 #include <QDebug>
 
@@ -299,7 +300,7 @@ bool TaskModel::loadTasklist(const QString &fileName)
 	beginResetModel();
 
 	_root->clear();
-	bool res = YamlSerialization::deserialize(fileName, _root);
+	bool res = JsonSerializer::deserialize(fileName, _root);
 
 	endResetModel();
 
@@ -311,5 +312,5 @@ bool TaskModel::saveTasklist(const QString &fileName)
 	if ( fileName.isEmpty() )
 		return false;
 
-	return YamlSerialization::serialize(fileName, _root);
+	return JsonSerializer::serialize(fileName, _root);
 }

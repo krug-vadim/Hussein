@@ -1,4 +1,4 @@
-QT += widgets core gui
+QT += core gui widgets
 
 TARGET = Hussein
 TEMPLATE = app
@@ -11,14 +11,14 @@ SOURCES += \
     src/ui/tasktreeview.cpp \
     src/models/tasksortfilterproxymodel.cpp \
     src/limbs/task.cpp \
-    src/serialization/yamlserialization.cpp \
     src/ui/tasktabwidget.cpp \
     src/limbs/taskmimedata.cpp \
     src/models/guitaskmodel.cpp \
     src/models/commands/taskremovecommand.cpp \
     src/models/commands/taskinsertcommand.cpp \
     src/models/commands/tasksetdatacommand.cpp \
-    src/models/commands/taskmovecommand.cpp
+    src/models/commands/taskmovecommand.cpp \
+    src/serialization/jsonserializer.cpp
 
 HEADERS  += \
     src/models/taskmodel.h \
@@ -27,14 +27,14 @@ HEADERS  += \
     src/ui/tasktreeview.h \
     src/models/tasksortfilterproxymodel.h \
     src/limbs/task.h \
-    src/serialization/yamlserialization.h \
     src/ui/tasktabwidget.h \
     src/limbs/taskmimedata.h \
     src/models/guitaskmodel.h \
     src/models/commands/taskremovecommand.h \
     src/models/commands/taskinsertcommand.h \
     src/models/commands/tasksetdatacommand.h \
-    src/models/commands/taskmovecommand.h
+    src/models/commands/taskmovecommand.h \
+    src/serialization/jsonserializer.h
 
 FORMS    += \
     src/ui/mainwindow.ui \
@@ -49,17 +49,4 @@ RESOURCES += \
 
 win32 {
     RC_FILE += Hussein.rc
-    INCLUDEPATH += "lib/yaml-cpp/include"
-    INCLUDEPATH += "lib/boost/"
-}
-
-CONFIG(debug, debug|release) {
-    win32:LIBS += "-L$$PWD/lib/yaml-cpp/build/debug/"
-    win32:LIBS += "-lyamld"
-    unix:LIBS += -lyaml-cpp
-} else {
-    #win32:LIBS += -lyaml
-    win32:LIBS += "-L$$PWD/lib/yaml-cpp/build/release/"
-    win32:LIBS += "-lyaml"
-    unix:LIBS += -lyaml-cpp
 }
