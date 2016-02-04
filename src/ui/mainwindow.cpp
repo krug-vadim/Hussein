@@ -11,6 +11,8 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 
+#include <QtQml/QQmlContext>
+
 #include "../serialization/jsonserializer.h"
 
 #include <QDebug>
@@ -83,7 +85,7 @@ void MainWindow::openFile()
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
 	                                                      tr("Open tasklist(s)..."),
 	                                                      QString(),
-	                                                      tr("Tasklist (*.yml);;Any (*.*)"));
+	                                                      tr("Tasklist (*.json);;Any (*.*)"));
 
 	openFiles(fileNames);
 }
@@ -105,7 +107,10 @@ void MainWindow::openFiles(const QStringList fileNames)
 		TaskTreeWidget *taskTreeWidget = createNewTaskTreeWidget(fileInfo.baseName());
 
 		if ( taskTreeWidget->load(fileName) )
+		{
 			status(tr("Opened %1.").arg(fileName));
+			_engine->rootContext()->setContextProperty("taskModel", (QAbstractItemModel*)taskTreeWidget->taskModel());
+		}
 		else
 			status(tr("Failed to open %1.").arg(fileName));
 	}

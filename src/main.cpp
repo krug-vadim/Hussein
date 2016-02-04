@@ -1,13 +1,19 @@
 #include <QtWidgets/QApplication>
 
+#include <QtQml/QQmlApplicationEngine>
+#include <QtQml/QQmlContext>
+
 #include "ui/mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	QApplication app(argc, argv);
+
+	QQmlApplicationEngine engine(QUrl("../src/ui/qml/main.qml"));
 
 	MainWindow w;
+	w._engine = &engine;
 	w.show();
 
-	return a.exec();
+	return app.exec();
 }

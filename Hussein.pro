@@ -1,4 +1,4 @@
-QT += core gui widgets
+QT += core gui widgets qml
 
 TARGET = Hussein
 TEMPLATE = app
@@ -50,3 +50,6 @@ RESOURCES += \
 win32 {
     RC_FILE += Hussein.rc
 }
+
+DISTFILES += \
+    src/ui/qml/main.qml

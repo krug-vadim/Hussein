@@ -48,6 +48,8 @@ class TaskTreeWidget : public QWidget
 
 		void taskDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int>&roles = QVector<int>());
 
+		GuiTaskModel *taskModel() const;
+
 	protected:
 		virtual void showEvent(QShowEvent * event);
 		virtual void keyPressEvent(QKeyEvent *event);

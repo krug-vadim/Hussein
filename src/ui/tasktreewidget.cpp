@@ -187,6 +187,11 @@ void TaskTreeWidget::taskDataChanged(const QModelIndex &topLeft, const QModelInd
 		ui->tasksView->expandTasks();
 }
 
+GuiTaskModel *TaskTreeWidget::taskModel() const
+{
+	return _taskModel;
+}
+
 void TaskTreeWidget::modifyTaskList()
 {
 	setModified(true);
