@@ -29,12 +29,13 @@ ApplicationWindow {
             width: 300
         }
         itemDelegate: Item {
-            Text {
+            TextInput {
                 anchors.verticalCenter: parent.verticalCenter
                 height: parent.height
                 /*color: styleData.textColor*/
                 /*elide: styleData.elideMode*/
                 text: styleData.value
+                readOnly: styleData.state
             }
         }
         /*TableViewColumn {
