@@ -71,6 +71,11 @@ QVariant TaskModel::data(const QModelIndex &index, int role) const
 				return task->description();
 			break;
 
+		case ExpandedRole:
+			if ( index.column() == 0 )
+				return task->isExpanded();
+			break;
+
 		default:
 			return task->data(role);
 			break;
@@ -313,4 +318,11 @@ bool TaskModel::saveTasklist(const QString &fileName)
 		return false;
 
 	return JsonSerializer::serialize(fileName, _root);
+}
+
+QHash<int, QByteArray> TaskModel::roleNames() const
+{
+	QHash<int, QByteArray> roles = QAbstractItemModel::roleNames();
+	roles[ExpandedRole] = "expanded";
+	return roles;
 }

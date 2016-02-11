@@ -9,6 +9,11 @@ class TaskModel : public QAbstractItemModel
 	Q_OBJECT
 
 	public:
+		enum TaskRoles
+		{
+			ExpandedRole = Qt::UserRole + 1
+		};
+
 		typedef QList<int> Path;
 
 		explicit TaskModel(QObject *parent = 0);
@@ -49,6 +54,8 @@ class TaskModel : public QAbstractItemModel
 
 		QModelIndex pathToIndex(const TaskModel::Path &path) const;
 		TaskModel::Path indexToPath(const QModelIndex &index);
+
+		QHash<int, QByteArray> roleNames() const;
 
 	protected:
 		TaskSharedPointer getTask(const QModelIndex &index) const;

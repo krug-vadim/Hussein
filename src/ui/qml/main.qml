@@ -21,7 +21,7 @@ ApplicationWindow {
             }
         }
     }
-    TreeView {
+    TaskView {
         anchors.fill: parent
         TableViewColumn {
             title: "Name"
@@ -29,7 +29,6 @@ ApplicationWindow {
             width: 300
         }
         itemDelegate: Item {
-
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 height: parent.height

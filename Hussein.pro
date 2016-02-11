@@ -52,4 +52,5 @@ win32 {
 }
 
 DISTFILES += \
-    src/ui/qml/main.qml
+    src/ui/qml/main.qml \
+    src/ui/qml/TaskView.qml
