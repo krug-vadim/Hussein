@@ -1,6 +1,7 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
+import QtQml.Models 2.2
 
 ApplicationWindow {
     visible: true
@@ -35,7 +36,7 @@ ApplicationWindow {
                 /*color: styleData.textColor*/
                 /*elide: styleData.elideMode*/
                 text: styleData.value
-                readOnly: styleData.state
+                //readOnly: styleDat
             }
         }
         /*TableViewColumn {
@@ -49,6 +50,9 @@ ApplicationWindow {
                 width: 100
             }*/
         model: taskModel
+        selection: ItemSelectionModel {
+             model: taskModel
+        }
     }
 
 }
