@@ -1,82 +1,53 @@
 import QtQuick 2.5
 import QtQuick.Controls 1.4
 import QtQuick.Dialogs 1.2
-
+import QtQml.Models 2.2
 
 TreeView {
 
     selectionMode: SelectionMode.ExtendedSelection;
 
-
     function addTask() {
-        var indexes = selection.selectedIndexes;
 
-        console.log(indexes);
-        console.log(indexes.length);
-
-        if ( indexes.length == 0 )
+        if ( selection.hasSelection )
         {
-            console.log("size 0");
+            var i;
+            var selectedIndexes = selection.selectedIndexes;
+            var selectedPersistent = [];
+            var newItemSelection = model.createItemSelection();
+
+            for(i = 0; i < selectedIndexes.length; i++)
+            {
+                selectedPersistent.push(model.createPersistentModelIndex(selectedIndexes[i]));
+            }
+
+            for(i = 0; i < selectedPersistent.length; i++)
+            {
+                model.insertRow(selectedPersistent[i].row + 1, selectedPersistent[i].parent);
+            }
+
+            for(i = 0; i < selectedPersistent.length; i++)
+            {
+                var next = model.index(selectedPersistent[i].row + 1,
+                                   selectedPersistent[i].column,
+                                   selectedPersistent[i].parent);
+                model.itemSelectionSelect(newItemSelection, next, next);
+            }
+            selection.select(newItemSelection, ItemSelectionModel.ClearAndSelect);
+            selection.setCurrentIndex(next, ItemSelectionModel.ClearAndSelect);
         }
         else
         {
-            for(var i = 0; i < indexes.length; i++)
-            {
-                console.log(model);
-                model.insert(indexes[i].row + 1, indexes[i].parent);
-                //model.insertRow(indexes[i].row + 1, indexes[i].parent);
-            }
+            var index = selectionModel.currentIndex;
 
-            /*QItemSelection selection;
+            if ( !model.insertRow(index.row + 1, index.parent) )
+                return;
 
-            foreach (const QPersistentModelIndex &i, indexes)
-                model()->insertRow(i.row() + 1, i.parent());*/
+            index = model.index(index.row + 1, 0, index.parent);
 
-            /*QModelIndex next;
-
-            foreach (const QPersistentModelIndex &i, indexes)
-            {
-                next = model()->index(i.row() + 1, i.column(), i.parent());
-                selection.select(next, next);
-            }
-
-            selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
-            selectionModel()->setCurrentIndex(next, QItemSelectionModel::ClearAndSelect);*/
-            console.log("size != 0");
+            selectionModel.setCurrentIndex(index, ItemSelectionModel.ClearAndSelect);
         }
-
-
-            /*if ( indexes.size() == 0 )
-            {
-                QModelIndex index = selectionModel()->currentIndex();
-
-                if ( !model()->insertRow(index.row() + 1, index.parent()) )
-                    return;
-
-                index = model()->index(index.row() + 1, 0, index.parent());
-
-                selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
-            }
-            else
-            {
-                QItemSelection selection;
-
-                foreach (const QPersistentModelIndex &i, indexes)
-                    model()->insertRow(i.row() + 1, i.parent());
-
-                QModelIndex next;
-
-                foreach (const QPersistentModelIndex &i, indexes)
-                {
-                    next = model()->index(i.row() + 1, i.column(), i.parent());
-                    selection.select(next, next);
-                }
-
-                selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
-                selectionModel()->setCurrentIndex(next, QItemSelectionModel::ClearAndSelect);
-            }*/
     }
-
 
     Keys.onPressed: {
         switch (event.key) {

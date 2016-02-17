@@ -202,7 +202,7 @@ const TaskSharedPointer &TaskModel::root() const
 	return _root;
 }
 
-bool TaskModel::insertRow(const TaskSharedPointer &task, int position, const QModelIndex &parent)
+bool TaskModel::insertTaskRow(const TaskSharedPointer &task, int position, const QModelIndex &parent)
 {
 	bool success = true;
 

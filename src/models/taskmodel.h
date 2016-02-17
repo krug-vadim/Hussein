@@ -41,21 +41,21 @@ class TaskModel : public QAbstractItemModel
 		QMimeData *mimeData(const QModelIndexList &indexes) const;
 		bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
-		const TaskSharedPointer &root() const;
+		Q_INVOKABLE const TaskSharedPointer &root() const;
 
 		//
-		bool insertRow(const TaskSharedPointer &task, int position, const QModelIndex &parent = QModelIndex());
+		Q_INVOKABLE bool insertTaskRow(const TaskSharedPointer &task, int position, const QModelIndex &parent = QModelIndex());
 
-		void tasksAboutToBeReseted();
-		void tasksReseted();
+		/*Q_INVOKABLE void tasksAboutToBeReseted();
+		Q_INVOKABLE void tasksReseted();*/
 
-		bool loadTasklist(const QString &fileName);
-		bool saveTasklist(const QString &fileName);
+		Q_INVOKABLE bool loadTasklist(const QString &fileName);
+		Q_INVOKABLE bool saveTasklist(const QString &fileName);
 
-		QModelIndex pathToIndex(const TaskModel::Path &path) const;
-		TaskModel::Path indexToPath(const QModelIndex &index);
+		Q_INVOKABLE QModelIndex pathToIndex(const TaskModel::Path &path) const;
+		Q_INVOKABLE TaskModel::Path indexToPath(const QModelIndex &index);
 
-		QHash<int, QByteArray> roleNames() const;
+		Q_INVOKABLE QHash<int, QByteArray> roleNames() const;
 
 	protected:
 		TaskSharedPointer getTask(const QModelIndex &index) const;

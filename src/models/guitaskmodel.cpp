@@ -90,6 +90,27 @@ bool GuiTaskModel::setData(const QModelIndex &index, const QVariant &value, int 
 	return true;
 }
 
+bool GuiTaskModel::insertRow(int row, const QModelIndex &parent)
+{
+	return TaskModel::insertRow(row, parent);
+}
+
+QPersistentModelIndex GuiTaskModel::createPersistentModelIndex(const QModelIndex &index) const
+{
+	return QPersistentModelIndex(index);
+}
+
+QItemSelection GuiTaskModel::createItemSelection() const
+{
+	return QItemSelection();
+}
+
+QItemSelection GuiTaskModel::itemSelectionSelect(QItemSelection selection, const QModelIndex &topLeft, const QModelIndex &bottomRight) const
+{
+	selection.select(topLeft, bottomRight);
+	return selection;
+}
+
 void GuiTaskModel::undo()
 {
 	if ( !_undoStack->canUndo() )

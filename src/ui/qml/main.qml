@@ -36,7 +36,7 @@ ApplicationWindow {
                 /*color: styleData.textColor*/
                 /*elide: styleData.elideMode*/
                 text: styleData.value
-                //readOnly: styleDat
+                readOnly: true
             }
         }
         /*TableViewColumn {

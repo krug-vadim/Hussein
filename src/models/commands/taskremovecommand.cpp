@@ -39,7 +39,7 @@ void TaskRemoveCommand::undo()
 	stUndo.beginMacro("nested move row");
 
 	QModelIndex parent = _model->pathToIndex(_path);
-	_model->TaskModel::insertRow(_task, _position, parent);
+	_model->TaskModel::insertTaskRow(_task, _position, parent);
 	_task.clear();
 
 	stUndo.endMacro();
